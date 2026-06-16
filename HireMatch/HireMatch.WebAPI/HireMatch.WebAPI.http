@@ -1,0 +1,6 @@
+@HireMatch.WebAPI_HostAddress = http://localhost:5086
+
+GET {{HireMatch.WebAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

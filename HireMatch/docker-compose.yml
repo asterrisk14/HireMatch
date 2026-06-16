@@ -1,0 +1,47 @@
+﻿services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - "1435:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=TvojaJakaLozinka123!
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  api:
+    build:
+      context: .
+      dockerfile: HireMatch.WebAPI/Dockerfile
+    ports:
+      - "5086:5086"
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:5086
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=hirematch;User Id=sa;Password=TvojaJakaLozinka123!;TrustServerCertificate=True
+      - RabbitMQ__Host=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__Username=guest
+      - RabbitMQ__Password=guest
+    depends_on:
+      - sqlserver
+      - rabbitmq
+
+  worker:
+    build:
+      context: .
+      dockerfile: HireMatch.Worker/Dockerfile
+    environment:
+      - RabbitMQ__Host=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__Username=guest
+      - RabbitMQ__Password=guest
+      - Smtp__Host=sandbox.smtp.mailtrap.io
+      - Smtp__Port=2525
+      - Smtp__Username=9711b79dbdabcf
+      - Smtp__Password=d92a5a7fcd8d78
+    depends_on:
+      - rabbitmq

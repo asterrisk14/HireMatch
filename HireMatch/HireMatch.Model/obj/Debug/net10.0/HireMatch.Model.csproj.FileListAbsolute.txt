@@ -1,0 +1,15 @@
+C:\Users\prask\Desktop\hirematch\HireMatch\tempbuild\HireMatch.Model.deps.json
+C:\Users\prask\Desktop\hirematch\HireMatch\tempbuild\HireMatch.Model.dll
+C:\Users\prask\Desktop\hirematch\HireMatch\tempbuild\HireMatch.Model.pdb
+C:\Users\prask\Desktop\hirematch\HireMatch\HireMatch.Model\bin\Debug\net10.0\HireMatch.Model.deps.json
+C:\Users\prask\Desktop\hirematch\HireMatch\HireMatch.Model\bin\Debug\net10.0\HireMatch.Model.dll
+C:\Users\prask\Desktop\hirematch\HireMatch\HireMatch.Model\bin\Debug\net10.0\HireMatch.Model.pdb
+C:\Users\prask\Desktop\hirematch\HireMatch\HireMatch.Model\obj\Debug\net10.0\HireMatch.Model.csproj.AssemblyReference.cache
+C:\Users\prask\Desktop\hirematch\HireMatch\HireMatch.Model\obj\Debug\net10.0\HireMatch.Model.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\prask\Desktop\hirematch\HireMatch\HireMatch.Model\obj\Debug\net10.0\HireMatch.Model.AssemblyInfoInputs.cache
+C:\Users\prask\Desktop\hirematch\HireMatch\HireMatch.Model\obj\Debug\net10.0\HireMatch.Model.AssemblyInfo.cs
+C:\Users\prask\Desktop\hirematch\HireMatch\HireMatch.Model\obj\Debug\net10.0\HireMatch.Model.csproj.CoreCompileInputs.cache
+C:\Users\prask\Desktop\hirematch\HireMatch\HireMatch.Model\obj\Debug\net10.0\HireMatch.Model.dll
+C:\Users\prask\Desktop\hirematch\HireMatch\HireMatch.Model\obj\Debug\net10.0\refint\HireMatch.Model.dll
+C:\Users\prask\Desktop\hirematch\HireMatch\HireMatch.Model\obj\Debug\net10.0\HireMatch.Model.pdb
+C:\Users\prask\Desktop\hirematch\HireMatch\HireMatch.Model\obj\Debug\net10.0\ref\HireMatch.Model.dll
