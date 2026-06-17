@@ -11,7 +11,8 @@ class ApplicationDetailScreen extends StatefulWidget {
   const ApplicationDetailScreen({super.key, required this.application});
 
   @override
-  State<ApplicationDetailScreen> createState() => _ApplicationDetailScreenState();
+  State<ApplicationDetailScreen> createState() =>
+      _ApplicationDetailScreenState();
 }
 
 class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
@@ -68,6 +69,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: const BackButton(),
         title: const Text('Application details'),
       ),
       body: SafeArea(
@@ -85,13 +87,13 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                   ),
                   child: logoUrl.isNotEmpty
                       ? ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
-                    child: Image.network(
-                      logoUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _logoFallback(title),
-                    ),
-                  )
+                          borderRadius: BorderRadius.circular(14),
+                          child: Image.network(
+                            logoUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => _logoFallback(title),
+                          ),
+                        )
                       : _logoFallback(title),
                 ),
                 const SizedBox(width: 14),
@@ -101,12 +103,22 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.tealDark),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.tealDark,
+                        ),
                       ),
                       if (company.toString().isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.only(top: 2),
-                          child: Text(company, style: const TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+                          child: Text(
+                            company,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
                         ),
                     ],
                   ),
@@ -114,8 +126,6 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
               ],
             ),
             const SizedBox(height: 24),
-
-            // Status prijave
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -124,21 +134,35 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.flag_outlined, color: AppColors.tealDark, size: 20),
+                  const Icon(
+                    Icons.flag_outlined,
+                    color: AppColors.tealDark,
+                    size: 20,
+                  ),
                   const SizedBox(width: 10),
-                  const Text('Status:', style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.tealDark)),
+                  const Text(
+                    'Status:',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.tealDark,
+                    ),
+                  ),
                   const SizedBox(width: 8),
-                  Text(status, style: const TextStyle(color: AppColors.tealDark)),
+                  Text(
+                    status,
+                    style: const TextStyle(color: AppColors.tealDark),
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: 16),
-
             _detailRow(Icons.calendar_today_outlined, 'Applied on', date),
             const Divider(height: 28),
-
             if (cvUrl.isNotEmpty) ...[
-              const Text('Submitted CV', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              const Text(
+                'Submitted CV',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
               const SizedBox(height: 8),
               OutlinedButton.icon(
                 onPressed: () => _openCv(cvUrl),
@@ -147,25 +171,51 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
               ),
               const Divider(height: 28),
             ],
-
-            const Text('Job description', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+            const Text(
+              'Job description',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
             const SizedBox(height: 8),
             if (_loadingJob)
-              const Center(child: Padding(padding: EdgeInsets.all(10), child: CircularProgressIndicator()))
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(10),
+                  child: CircularProgressIndicator(),
+                ),
+              )
             else if (_job != null) ...[
               Text(
                 _job!.description,
-                style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.5),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                  height: 1.5,
+                ),
               ),
               const SizedBox(height: 16),
               if (_job!.location.isNotEmpty)
-                _detailRow(Icons.location_on_outlined, 'Location', _job!.location),
+                _detailRow(
+                  Icons.location_on_outlined,
+                  'Location',
+                  _job!.location,
+                ),
               if (_job!.employmentTypeName.isNotEmpty)
-                _detailRow(Icons.work_outline, 'Employment type', _job!.employmentTypeName),
+                _detailRow(
+                  Icons.work_outline,
+                  'Employment type',
+                  _job!.employmentTypeName,
+                ),
               if (_job!.compensation.isNotEmpty)
-                _detailRow(Icons.payments_outlined, 'Compensation', _job!.compensation),
+                _detailRow(
+                  Icons.payments_outlined,
+                  'Compensation',
+                  _job!.compensation,
+                ),
             ] else
-              const Text('Job details unavailable.', style: TextStyle(color: AppColors.textMuted)),
+              const Text(
+                'Job details unavailable.',
+                style: TextStyle(color: AppColors.textMuted),
+              ),
           ],
         ),
       ),
@@ -180,8 +230,19 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
         children: [
           Icon(icon, size: 18, color: AppColors.textMuted),
           const SizedBox(width: 10),
-          Text('$label: ', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-          Expanded(child: Text(value, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary))),
+          Text(
+            '$label: ',
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -191,7 +252,11 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
     return Center(
       child: Text(
         title.isNotEmpty ? title.substring(0, 1).toUpperCase() : '?',
-        style: const TextStyle(color: AppColors.tealDark, fontWeight: FontWeight.bold, fontSize: 22),
+        style: const TextStyle(
+          color: AppColors.tealDark,
+          fontWeight: FontWeight.bold,
+          fontSize: 22,
+        ),
       ),
     );
   }

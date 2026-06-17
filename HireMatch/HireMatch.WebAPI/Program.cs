@@ -17,15 +17,13 @@ DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Omogući CORS da Angular frontend može pričati sa backendom
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policy =>
     {
         policy.AllowAnyHeader()
               .AllowAnyMethod()
-              .WithOrigins("http://localhost:4200") // Podrazumijevani Angular port
-              .AllowCredentials();
+              .AllowAnyOrigin();
     });
 });
 
@@ -97,8 +95,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<HireMatch.Services.Database.HireMatchDbContext>();
+    db.Database.EnsureCreated();
+}
 
-// Middleware pipeline
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

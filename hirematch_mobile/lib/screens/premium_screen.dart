@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import '../theme.dart';
 import '../services/payment_service.dart';
-import '../services/auth_service.dart';
 import '../providers/auth_provider.dart';
 
 class PremiumScreen extends StatefulWidget {
@@ -19,34 +18,22 @@ class _PremiumScreenState extends State<PremiumScreen> {
   String? _message;
   bool _messageIsError = false;
 
-  bool get _isPremium => context.read<AuthProvider>().user?.isPremium ?? false;
-
   Future<void> _upgrade() async {
     setState(() {
       _processing = true;
       _message = null;
     });
-
     try {
-      // 1. Backend kreira PaymentIntent i vraća clientSecret
       final clientSecret = await _paymentService.createPaymentIntent();
-
-      // 2. Inicijalizuj Stripe PaymentSheet (in-app)
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: clientSecret,
           merchantDisplayName: 'HireMatch',
         ),
       );
-
-      // 3. Prikaži PaymentSheet korisniku
       await Stripe.instance.presentPaymentSheet();
-
-      // 4. Plaćanje uspješno na klijentu; backend webhook potvrđuje i postavlja IsPremium.
-      //    Dajemo backendu sekundu pa osvježavamo korisnika.
       await Future.delayed(const Duration(seconds: 2));
       await _refreshUser();
-
       setState(() {
         _processing = false;
         _message = 'Payment successful! You are now a Premium member.';
@@ -72,26 +59,30 @@ class _PremiumScreenState extends State<PremiumScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Cancel Premium'),
-        content: const Text('Are you sure you want to cancel Premium and get a refund?'),
+        content: const Text('Are you sure?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('No')),
-          ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Yes, refund')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('No'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Yes'),
+          ),
         ],
       ),
     );
     if (confirmed != true) return;
-
     setState(() {
       _processing = true;
       _message = null;
     });
-
     try {
       await _paymentService.refundPremium();
       await _refreshUser();
       setState(() {
         _processing = false;
-        _message = 'Refund processed. Premium has been removed.';
+        _message = 'Refund processed.';
         _messageIsError = false;
       });
     } catch (e) {
@@ -103,18 +94,15 @@ class _PremiumScreenState extends State<PremiumScreen> {
     }
   }
 
-  // Ponovo učitaj korisnika da osvježimo isPremium status
   Future<void> _refreshUser() async {
-    final auth = context.read<AuthProvider>();
-    await auth.reloadUser();
+    await context.read<AuthProvider>().reloadUser();
   }
 
   @override
   Widget build(BuildContext context) {
     final isPremium = context.watch<AuthProvider>().user?.isPremium ?? false;
-
     return Scaffold(
-      appBar: AppBar(title: const Text('Premium')),
+      appBar: AppBar(leading: const BackButton(), title: const Text('Premium')),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(24),
@@ -124,8 +112,6 @@ class _PremiumScreenState extends State<PremiumScreen> {
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [AppColors.tealDark, AppColors.tealMain],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -136,92 +122,64 @@ class _PremiumScreenState extends State<PremiumScreen> {
                   const SizedBox(height: 12),
                   Text(
                     isPremium ? 'You are Premium!' : 'HireMatch Premium',
-                    style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  const SizedBox(height: 8),
                   Text(
                     isPremium
-                        ? 'Your profile is highlighted to recruiters.'
-                        : 'Stand out to recruiters and get noticed first.',
-                    style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 14),
+                        ? 'Your profile is highlighted.'
+                        : 'Stand out to recruiters.',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.85),
+                      fontSize: 14,
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-
-            const Text('What you get', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            const SizedBox(height: 12),
-            _benefit('Your profile appears at the top of the Talent Pool'),
-            _benefit('A Premium badge on your profile'),
-            _benefit('Higher visibility to recruiters'),
-
+            _benefit('Profile top of Talent Pool'),
+            _benefit('Premium badge'),
+            _benefit('Higher visibility'),
             const SizedBox(height: 24),
-            Center(
-              child: Text(
-                isPremium ? '' : '\$15.00 one-time',
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.tealDark),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            if (_message != null) ...[
+            if (_message != null)
               Container(
-                width: double.infinity,
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: _messageIsError ? const Color(0xFFFDE8E8) : const Color(0xFFEAF6EC),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  _message!,
-                  style: TextStyle(
-                    color: _messageIsError ? const Color(0xFFC0392B) : const Color(0xFF2E5E3A),
-                    fontSize: 13,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+                color: _messageIsError
+                    ? Colors.red.shade100
+                    : Colors.green.shade100,
+                child: Text(_message!, textAlign: TextAlign.center),
               ),
-              const SizedBox(height: 16),
-            ],
-
-            if (!isPremium)
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _processing ? null : _upgrade,
-                  child: _processing
-                      ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : const Text('Upgrade to Premium'),
-                ),
-              )
-            else
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: _processing ? null : _refund,
-                  child: _processing
-                      ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Text('Cancel & Refund'),
-                ),
-              ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: isPremium
+                  ? OutlinedButton(
+                      onPressed: _processing ? null : _refund,
+                      child: const Text('Cancel & Refund'),
+                    )
+                  : ElevatedButton(
+                      onPressed: _processing ? null : _upgrade,
+                      child: const Text('Upgrade to Premium'),
+                    ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _benefit(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(Icons.check_circle, color: AppColors.tealMain, size: 20),
-          const SizedBox(width: 10),
-          Expanded(child: Text(text, style: const TextStyle(fontSize: 14))),
-        ],
-      ),
-    );
-  }
+  Widget _benefit(String text) => Padding(
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Row(
+      children: [
+        const Icon(Icons.check_circle, color: AppColors.tealMain),
+        const SizedBox(width: 10),
+        Text(text),
+      ],
+    ),
+  );
 }

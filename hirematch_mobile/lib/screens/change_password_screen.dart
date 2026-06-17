@@ -11,7 +11,6 @@ class ChangePasswordScreen extends StatefulWidget {
 
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final AuthService _authService = AuthService();
-
   final _currentController = TextEditingController();
   final _newController = TextEditingController();
   final _confirmController = TextEditingController();
@@ -24,23 +23,26 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   Future<void> _submit() async {
     setState(() => _error = null);
-
     if (_currentController.text.isEmpty) {
       setState(() => _error = 'Please enter your current password.');
       return;
     }
     if (_newController.text.length < 6) {
-      setState(() => _error = 'New password must be at least 6 characters long.');
+      setState(
+        () => _error = 'New password must be at least 6 characters long.',
+      );
       return;
     }
     if (_newController.text != _confirmController.text) {
       setState(() => _error = 'New password and confirmation do not match.');
       return;
     }
-
     setState(() => _saving = true);
     try {
-      await _authService.changePassword(_currentController.text, _newController.text);
+      await _authService.changePassword(
+        _currentController.text,
+        _newController.text,
+      );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Password changed successfully!')),
@@ -66,7 +68,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       decoration: InputDecoration(
         labelText: label,
         suffixIcon: IconButton(
-          icon: Icon(obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+          icon: Icon(
+            obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+          ),
           onPressed: onToggle,
         ),
       ),
@@ -77,13 +81,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: const BackButton(),
         title: const Text('Change password'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
       ),
       body: SafeArea(
         child: ListView(
@@ -91,7 +90,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           children: [
             const Text(
               'Update your password',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.tealDark),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.tealDark,
+              ),
             ),
             const SizedBox(height: 6),
             const Text(
@@ -103,7 +106,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               controller: _currentController,
               label: 'Current password',
               obscure: _obscureCurrent,
-              onToggle: () => setState(() => _obscureCurrent = !_obscureCurrent),
+              onToggle: () =>
+                  setState(() => _obscureCurrent = !_obscureCurrent),
             ),
             const SizedBox(height: 14),
             _passwordField(
@@ -117,7 +121,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               controller: _confirmController,
               label: 'Confirm new password',
               obscure: _obscureConfirm,
-              onToggle: () => setState(() => _obscureConfirm = !_obscureConfirm),
+              onToggle: () =>
+                  setState(() => _obscureConfirm = !_obscureConfirm),
             ),
             if (_error != null) ...[
               const SizedBox(height: 14),
@@ -130,7 +135,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 ),
                 child: Text(
                   _error!,
-                  style: const TextStyle(color: Color(0xFFC0392B), fontSize: 13),
+                  style: const TextStyle(
+                    color: Color(0xFFC0392B),
+                    fontSize: 13,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -142,9 +150,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 onPressed: _saving ? null : _submit,
                 child: _saving
                     ? const SizedBox(
-                  height: 18, width: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                )
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
                     : const Text('Change password'),
               ),
             ),

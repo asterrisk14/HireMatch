@@ -230,7 +230,6 @@ modelBuilder.Entity<Industry>().HasData(
     );
 
 
-    // 6. INICIJALNI ADMIN (Spreman za produkciju)
     modelBuilder.Entity<MyAppUser>().HasData(
         new MyAppUser
         {
@@ -241,8 +240,9 @@ modelBuilder.Entity<Industry>().HasData(
             PasswordHash = "$2a$11$JO5M9Y9U1otkWfU2DR92eeNc6eUbdM0nP6YdqfGht90NhNW1mIYxC",
             Role = "Admin",
             Phone = "000-000-000",
-            CountryId = null, // BiH (Id = 1)
-            CityId = null     // Sarajevo (Id = 1)
+            CountryId = null, 
+            CityId = null     
+            
         }
     );
    

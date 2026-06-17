@@ -8,6 +8,9 @@
       <excludeFolder url="file://$MODULE_DIR$/hirematch_mobile/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/hirematch_mobile/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/hirematch_mobile/build" />
+      <excludeFolder url="file://$MODULE_DIR$/hirematch_admin/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/hirematch_admin/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/hirematch_admin/build" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

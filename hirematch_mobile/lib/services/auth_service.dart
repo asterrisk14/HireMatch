@@ -2,12 +2,18 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth_models.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io' show Platform;
 
 class ApiConfig {
-  static const String baseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:5086',
-  );
+  static String get baseUrl {
+    if (kIsWeb) {
+      return 'http://localhost:5086';
+    } else if (Platform.isAndroid) {
+      return 'http://10.0.2.2:5086';
+    }
+    return 'http://localhost:5086';
+  }
 }
 
 class AuthService {
@@ -51,22 +57,29 @@ class AuthService {
     required int cityId,
     String? phone,
   }) async {
-    final response = await http.post(
-      Uri.parse('${ApiConfig.baseUrl}/Account/register'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'firstName': firstName,
-        'lastName': lastName,
-        'email': email,
-        'password': password,
-        'dateOfBirth': dateOfBirth,
-        'countryId': countryId,
-        'cityId': cityId,
-        'phone': phone ?? '',
-      }),
-    ).timeout(const Duration(seconds: 15), onTimeout: () {
-      throw Exception('Connection timed out. Check that the backend is running and reachable.');
-    });
+    final response = await http
+        .post(
+          Uri.parse('${ApiConfig.baseUrl}/Account/register'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'firstName': firstName,
+            'lastName': lastName,
+            'email': email,
+            'password': password,
+            'dateOfBirth': dateOfBirth,
+            'countryId': countryId,
+            'cityId': cityId,
+            'phone': phone ?? '',
+          }),
+        )
+        .timeout(
+          const Duration(seconds: 15),
+          onTimeout: () {
+            throw Exception(
+              'Connection timed out. Check that the backend is running and reachable.',
+            );
+          },
+        );
 
     if (response.statusCode == 200) {
       final data = AuthResponse.fromJson(jsonDecode(response.body));
@@ -93,7 +106,10 @@ class AuthService {
     await prefs.remove(_userKey);
   }
 
-  Future<void> changePassword(String currentPassword, String newPassword) async {
+  Future<void> changePassword(
+    String currentPassword,
+    String newPassword,
+  ) async {
     final token = await getToken();
     final response = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/Account/change-password'),

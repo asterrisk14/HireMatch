@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HireMatch.WebAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [Authorize]
     public class PaymentController : ControllerBase
     {

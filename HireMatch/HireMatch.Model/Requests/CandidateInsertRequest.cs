@@ -8,7 +8,8 @@ namespace HireMatch.Model.Requests
         public string LastName { get; set; } = default!;
         public string Email { get; set; } = default!;
         public string Phone { get; set; } = default!;
-        public string Location { get; set; } = default!;
+        public int? CountryId { get; set; }
+        public int? CityId { get; set; }
         public string CurrentTitle { get; set; } = default!;
         public int YearsOfExperience { get; set; }
         public string Summary { get; set; } = default!;
