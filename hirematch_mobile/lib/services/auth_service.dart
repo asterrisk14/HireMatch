@@ -4,16 +4,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth_models.dart';
 
 class ApiConfig {
-  /// API adresa se čita iz --dart-define=API_BASE_URL=... pri pokretanju.
-  /// Ako nije proslijeđena, koristi se default vrijednost ispod.
-  ///
-  /// Primjer pokretanja za fizički telefon:
-  ///   flutter run --dart-define=API_BASE_URL=http://192.168.0.3:5086
-  ///
-  /// Za emulator: --dart-define=API_BASE_URL=http://10.0.2.2:5086
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://192.168.0.3:5086',
+    defaultValue: 'http://10.0.2.2:5086',
   );
 }
 

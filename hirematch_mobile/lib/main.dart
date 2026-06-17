@@ -7,9 +7,7 @@ import 'providers/favoruites_provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_navigation.dart';
 
-// Stripe publishable key se čita iz --dart-define (ne hardkodira se).
-// Pokretanje:
-//   flutter run --dart-define=API_BASE_URL=http://192.168.0.3:5086 --dart-define=STRIPE_PUBLISHABLE_KEY=pk_test_...
+
 const String stripePublishableKey = String.fromEnvironment('STRIPE_PUBLISHABLE_KEY', defaultValue: 'pk_test_51Tit6mFNY5ev6BaeGC5lDBEBspWWLYvsahtBOnENeQ9xTKWOncOk9fwoypE4xXkF8rsg7x2FhnxcczbS2ux3RWtG00HsYtisaI');
 
 void main() async {
@@ -18,7 +16,6 @@ void main() async {
     Stripe.publishableKey = stripePublishableKey;
     await Stripe.instance.applySettings();
   } catch (e) {
-    // ignore: avoid_print
     print('Stripe init error: $e');
   }
   runApp(const HireMatchApp());
