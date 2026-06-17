@@ -1,11 +1,11 @@
-using HireMatch.Services.Interfaces;
+﻿using HireMatch.Services.Interfaces;
 using HireMatch.Model.Requests;
 using HireMatch.Model.Responses;
 using HireMatch.Services.Database;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using BCrypt.Net; // OVO JE KLJUČNO
+using BCrypt.Net;
 
 namespace HireMatch.WebAPI.Controllers
 {
@@ -13,7 +13,7 @@ namespace HireMatch.WebAPI.Controllers
     [Route("[controller]")]
     public class AccountController : ControllerBase
     {
-        private readonly HireMatchDbContext _context; // Koristi specifičan tip umjesto DbContext
+        private readonly HireMatchDbContext _context;
         private readonly ITokenService _tokenService;
 
         public AccountController(HireMatchDbContext context, ITokenService tokenService)
@@ -48,7 +48,6 @@ namespace HireMatch.WebAPI.Controllers
                 _context.MyAppUsers.Add(user);
                 await _context.SaveChangesAsync();
 
-                // Kreiraj Candidate profil za novog korisnika
                 var candidate = new Candidate
                 {
                     MyAppUserId = user.Id,
@@ -73,13 +72,39 @@ namespace HireMatch.WebAPI.Controllers
                 throw;
             }
         }
+
+        [HttpPost("create-admin")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> CreateAdmin(RegisterRequest registerDto)
+        {
+            if (await _context.MyAppUsers.AnyAsync(x => x.Email == registerDto.Email))
+                return BadRequest("Email is already in use");
+
+            var user = new MyAppUser
+            {
+                FirstName = registerDto.FirstName,
+                LastName = registerDto.LastName,
+                Email = registerDto.Email,
+                Phone = registerDto.Phone,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password),
+                Role = "Admin",
+                CountryId = registerDto.CountryId,
+                CityId = registerDto.CityId,
+                DateOfBirth = registerDto.DateOfBirth
+            };
+
+            _context.MyAppUsers.Add(user);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = $"Admin nalog za {user.Email} je uspjesno kreiran." });
+        }
+
         [HttpPost("login")]
         [AllowAnonymous]
         public async Task<ActionResult<AuthResponse>> Login(LoginRequest loginDto)
         {
             var user = await _context.MyAppUsers.FirstOrDefaultAsync(x => x.Email == loginDto.Email);
-            
-            // PROVJERA HASHIRANE LOZINKE
+
             if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
             {
                 return Unauthorized("Invalid email or password");
@@ -101,14 +126,13 @@ namespace HireMatch.WebAPI.Controllers
             var user = await _context.MyAppUsers.FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null) return NotFound();
 
-            // PROVJERA I RE-HASHIRANJE
             if (!BCrypt.Net.BCrypt.Verify(request.CurrentPassword, user.PasswordHash))
                 return BadRequest(new { message = "Trenutna lozinka nije ispravna." });
 
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Lozinka je uspješno promijenjena." });
+            return Ok(new { message = "Lozinka je uspjesno promijenjena." });
         }
 
         private AuthResponse ToAuthResponse(MyAppUser user)
@@ -117,13 +141,13 @@ namespace HireMatch.WebAPI.Controllers
             {
                 Id = user.Id,
                 Email = user.Email,
-                Token = _tokenService.CreateToken(user), 
+                Token = _tokenService.CreateToken(user),
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Role = user.Role,
                 Phone = user.Phone ?? string.Empty,
                 IsPremium = user.IsPremium,
-                DateOfBirth = user.DateOfBirth // Pretpostavljam da ti je to polje u modelu MyAppUser
+                DateOfBirth = user.DateOfBirth
             };
         }
     }
