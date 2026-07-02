@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using HireMatch.Model.Requests;
-using HireMatch.Services.Interfaces; // <-- DODANO
+using HireMatch.Services.Interfaces; 
 
 namespace HireMatch.WebAPI.Controllers
 {

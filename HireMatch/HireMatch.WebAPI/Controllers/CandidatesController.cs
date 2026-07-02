@@ -72,7 +72,6 @@ namespace HireMatch.WebAPI.Controllers
                 "RecruiterContact",
                 "A recruiter from HireMatch is interested in your profile and may reach out soon.");
 
-            // Email kroz RabbitMQ -> Worker
             if (!string.IsNullOrEmpty(candidate.Email))
             {
                 _publisher.PublishEmail(new HireMatch.Services.Messaging.EmailMessage

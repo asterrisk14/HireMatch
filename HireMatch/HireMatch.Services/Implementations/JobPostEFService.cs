@@ -41,7 +41,6 @@ namespace HireMatch.Services.Implementations
                 if (!string.IsNullOrWhiteSpace(search.Title))
                     query = query.Where(x => x.Title.ToLower().Contains(search.Title.ToLower()));
 
-                // Location filter sada po imenu grada
                 if (!string.IsNullOrWhiteSpace(search.Location))
                 {
                     var location = search.Location.ToLower();
@@ -91,7 +90,6 @@ namespace HireMatch.Services.Implementations
                 EmploymentTypeId = entity.EmploymentTypeId,
                 EmploymentTypeName = entity.EmploymentType?.Name ?? string.Empty,
                 IsPaid = entity.IsPaid,
-                // Location se puni iz grada (+ work mode ako postoji), Flutter kompatibilnost
                 Location = entity.City?.Name ?? string.Empty,
                 CityId = entity.CityId,
                 CityName = entity.City?.Name ?? string.Empty,
@@ -158,7 +156,6 @@ namespace HireMatch.Services.Implementations
             entity.ExpiryDate = request.ExpiryDate;
             entity.UpdatedAt = DateTime.UtcNow;
 
-            // Ažuriraj vještine: obriši stare, dodaj nove
             _dbContext.JobPostSkills.RemoveRange(entity.JobPostSkills);
             foreach (var skillId in request.SkillIds.Distinct())
                 entity.JobPostSkills.Add(new JobPostSkill { SkillId = skillId });

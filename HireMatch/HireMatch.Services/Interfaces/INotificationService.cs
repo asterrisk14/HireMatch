@@ -12,7 +12,6 @@ namespace HireMatch.Services.Interfaces
         Task<int> GetUnreadCount(int userId);
         Task MarkAsRead(int userId, int notificationId);
         Task MarkAllAsRead(int userId);
-        // Interno - kreiranje notifikacije (poziva se iz drugih servisa)
         Task CreateNotification(int userId, string type, string message);
     }
 }

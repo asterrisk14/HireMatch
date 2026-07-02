@@ -32,14 +32,12 @@ namespace HireMatch.Services.Database
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure composite primary keys for junction tables
             modelBuilder.Entity<JobPostSkill>()
                 .HasKey(jps => new { jps.JobPostId, jps.SkillId });
 
             modelBuilder.Entity<UserSkill>()
                 .HasKey(us => new { us.UserId, us.SkillId });
 
-            // Configure relationships to avoid cascade cycles
             modelBuilder.Entity<Application>()
                 .HasOne(a => a.Candidate)
                 .WithMany()
@@ -63,7 +61,6 @@ namespace HireMatch.Services.Database
                 new CareerTip { Id = 2, Icon = "💬", Title = "Top 3 soft skills recruiters love", Content = "Communication, teamwork and problem-solving consistently rank highest. Show examples of these in your interviews.", CreatedAt = new DateTime(2025, 1, 2) },
                 new CareerTip { Id = 3, Icon = "🚀", Title = "Don't have experience? Here's what to do", Content = "Apply for internships, contribute to open-source projects, or take on freelance work to build your portfolio.", CreatedAt = new DateTime(2025, 1, 3) }
             );
-            // Povezano sa ICollection<Application> Applications unutar JobPost.cs
             modelBuilder.Entity<Application>()
                 .HasOne(a => a.JobPost)
                 .WithMany(j => j.Applications) 
@@ -76,7 +73,6 @@ namespace HireMatch.Services.Database
                 .HasForeignKey(f => f.CandidateId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // Povezano sa ICollection<Favourite> Favourites unutar JobPost.cs
             modelBuilder.Entity<Favourite>()
                 .HasOne(f => f.JobPost)
                 .WithMany(j => j.Favourites)
@@ -89,7 +85,6 @@ namespace HireMatch.Services.Database
                 .HasForeignKey(jv => jv.CandidateId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // Povezano sa ICollection<JobView> JobViews unutar JobPost.cs
             modelBuilder.Entity<JobView>()
                 .HasOne(jv => jv.JobPost)
                 .WithMany(j => j.JobViews)
@@ -108,7 +103,6 @@ namespace HireMatch.Services.Database
                 .HasForeignKey(m => m.ReceiverId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // Povezano sa ICollection<Message> Messages unutar JobPost.cs
             modelBuilder.Entity<Message>()
                 .HasOne(m => m.JobPost)
                 .WithMany(j => j.Messages)
@@ -133,21 +127,18 @@ namespace HireMatch.Services.Database
                 .HasForeignKey(c => c.CityId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // JobPost -> City
             modelBuilder.Entity<JobPost>()
                 .HasOne(j => j.City)
                 .WithMany()
                 .HasForeignKey(j => j.CityId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // JobPost -> WorkMode
             modelBuilder.Entity<JobPost>()
                 .HasOne(j => j.WorkMode)
                 .WithMany(w => w.JobPosts)
                 .HasForeignKey(j => j.WorkModeId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // WorkMode seed
             modelBuilder.Entity<WorkMode>().HasData(
                 new WorkMode { Id = 1, Name = "Remote" },
                 new WorkMode { Id = 2, Name = "Hybrid" },
@@ -163,7 +154,6 @@ namespace HireMatch.Services.Database
     new Country { Id = 5, Name = "Crna Gora" }
 );
 
-// 2. Gradovi (Sada im ponosno dodajemo CountryId = 1)
 modelBuilder.Entity<City>().HasData(
         new City { Id = 1, Name = "Sarajevo", CountryId = 1 },
         new City { Id = 2, Name = "Banja Luka", CountryId = 1 },
@@ -203,7 +193,6 @@ modelBuilder.Entity<EmploymentType>().HasData(
     new EmploymentType { Id = 7, Name = "Contract" }
 );
 
-// 4. Industrije
 modelBuilder.Entity<Industry>().HasData(
     new Industry { Id = 1, Name = "IT" },
     new Industry { Id = 2, Name = "Marketing" },
@@ -219,7 +208,6 @@ modelBuilder.Entity<Industry>().HasData(
     new Industry { Id = 12, Name = "Financial" }
 );
 
-    // 5. Inicijalne vještine
     modelBuilder.Entity<Skill>().HasData(
         new Skill { Id = 1, Name = ".NET" },
         new Skill { Id = 2, Name = "Angular" },
@@ -255,7 +243,6 @@ modelBuilder.Entity<Industry>().HasData(
         new ApplicationStatus { Id = 6, Name = "Rejected" }
     );
             
-            // ==================== KRAJ SEED PODATAKA ====================
         }
     }
 }

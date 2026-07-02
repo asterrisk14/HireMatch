@@ -26,7 +26,7 @@ namespace HireMatch.Services.Implementations
             {
                 new Claim(JwtRegisteredClaimNames.NameId, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role ?? "Candidate") // Prilagođeno tvom defaultu "Candidate"
+                new Claim(ClaimTypes.Role, user.Role ?? "Candidate") 
             };
 
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);

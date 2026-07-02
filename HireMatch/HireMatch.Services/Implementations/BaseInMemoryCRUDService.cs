@@ -21,7 +21,6 @@ namespace HireMatch.Services
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
             var entity = request.Adapt<TEntity>();
-            // Assume entities have an Id property
             var idProperty = typeof(TEntity).GetProperty("Id");
             if (idProperty != null && idProperty.PropertyType == typeof(int))
             {

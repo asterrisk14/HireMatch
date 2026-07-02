@@ -34,7 +34,6 @@ namespace HireMatch.Services.Implementations
 
         public virtual async Task<PagedResult<TResponse>> Get(TSearch search)
         {
-            // Read-only servis obavezno koristi AsNoTracking za maksimalnu brzinu
             var query = _dbSet.AsNoTracking();
             query = ApplySearchFilters(query, search);
 
@@ -46,17 +45,14 @@ namespace HireMatch.Services.Implementations
                 result.TotalCount = await query.CountAsync();
             }
 
-            // 2. Primjenjujemo paginaciju na IQueryable (baza reže podatke)
             if (search?.Page.HasValue == true && search.PageSize.HasValue)
             {
                 query = query.Skip((search.Page.Value - 1) * search.PageSize.Value)
                              .Take(search.PageSize.Value);
             }
 
-            // 3. Tek sada povlačimo tačan broj zapisa u memoriju
             var entities = await query.ToListAsync();
 
-            // 4. Mapiramo čistu listu u Response DTO
             result.Result = entities.Select(e => e.Adapt<TResponse>()).ToList();
 
             return result;
@@ -64,7 +60,6 @@ namespace HireMatch.Services.Implementations
 
         public virtual async Task<TResponse?> GetById(int id)
         {
-            // Rješavamo se dynamic kasta i koristimo ugrađeni FindAsync
             var entity = await _dbSet.FindAsync(id);
             return entity?.Adapt<TResponse>();
         }

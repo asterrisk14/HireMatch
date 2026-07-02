@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using HireMatch.Model.Requests;
 using HireMatch.Services.Database;
-using HireMatch.Services.Interfaces; // <-- DODANO
+using HireMatch.Services.Interfaces; 
 
 namespace HireMatch.Services.Implementations
 {

@@ -6,12 +6,11 @@ namespace HireMatch.WebAPI.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    // Ovdje dodajemo ograničenja i za TInsert i TUpdate
     public class BaseCRUDController<TResponse, TSearch, TInsert, TUpdate> : BaseController<TResponse, TSearch>
         where TResponse : class
         where TSearch : BaseSearchObject
-        where TInsert : class // Ovo popravlja grešku
-        where TUpdate : class // Ovo popravlja grešku
+        where TInsert : class 
+        where TUpdate : class
     {
         protected readonly IBaseCRUDService<TResponse, TSearch, TInsert, TUpdate> _crudService;
 
@@ -24,7 +23,6 @@ namespace HireMatch.WebAPI.Controllers
         public virtual async Task<IActionResult> Post([FromBody] TInsert request)
         {
             var result = await _crudService.Insert(request);
-            // Koristimo dynamic da izvučemo Id iz rezultata za CreatedAtAction
             return CreatedAtAction(nameof(GetById), new { id = (result as dynamic)?.Id }, result);
         }
 

@@ -59,7 +59,6 @@ namespace HireMatch.WebAPI.Controllers
                 var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
                 if (paymentIntent?.Id != null)
                 {
-                    // Izvlačimo userId iz uplate
                     if (paymentIntent.Metadata.TryGetValue("userId", out var userIdStr) && int.TryParse(userIdStr, out var userId))
                     {
                         _logger.LogInformation("Uspješna uplata za korisnika ID: {UserId}. Aktiviram Premium...", userId);
@@ -67,7 +66,7 @@ namespace HireMatch.WebAPI.Controllers
                         var user = await _context.MyAppUsers.FirstOrDefaultAsync(x => x.Id == userId);
                         if (user != null)
                         {
-                            user.IsPremium = true; // Korisnik postaje Premium član!
+                            user.IsPremium = true; 
                             await _context.SaveChangesAsync();
                             _logger.LogInformation("Korisnik {UserId} je uspješno nadograđen na Premium.", userId);
                         }

@@ -23,8 +23,7 @@ namespace HireMatch.Services
         {
             var query = _data.AsQueryable();
 
-            // Apply search filters if needed
-            // For simplicity, just return all for now
+        
 
             var list = query.ToList();
             var result = new PagedResult<TResponse>

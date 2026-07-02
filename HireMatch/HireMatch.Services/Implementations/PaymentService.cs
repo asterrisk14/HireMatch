@@ -44,7 +44,6 @@ namespace HireMatch.Services.Implementations
     var service = new PaymentIntentService();
     var paymentIntent = await service.CreateAsync(options);
 
-    // Zapamti intent za kasniji refund
     user.LastPaymentIntentId = paymentIntent.Id;
     await _context.SaveChangesAsync();
 
@@ -66,7 +65,6 @@ namespace HireMatch.Services.Implementations
             if (!user.IsPremium || string.IsNullOrEmpty(user.LastPaymentIntentId))
                 throw new ArgumentException("Nema aktivne Premium uplate za povrat.");
 
-            // Stvarni refund preko Stripe (na osnovu stvarno naplaćenog PaymentIntent-a)
             var refundService = new RefundService();
             await refundService.CreateAsync(new RefundCreateOptions
             {
