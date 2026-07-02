@@ -30,22 +30,6 @@ class _NavGroup {
   const _NavGroup({this.groupLabel, required this.items});
 }
 
-const _pages = [
-  DashboardScreen(),
-  AnalyticsScreen(),
-  JobPostsScreen(),
-  ApplicationsScreen(),
-  TalentPoolScreen(),
-  CompaniesScreen(),
-  IndustriesScreen(),
-  EmploymentTypesScreen(),
-  SkillsScreen(),
-  CountriesScreen(),
-  CitiesScreen(),
-  ApplicationStatusesScreen(),
-  CareerTipsScreen(),
-];
-
 const _navGroups = [
   _NavGroup(
     items: [
@@ -74,6 +58,39 @@ const _navGroups = [
   ),
 ];
 
+Widget _buildPage(int index) {
+  switch (index) {
+    case 0:
+      return const DashboardScreen();
+    case 1:
+      return const AnalyticsScreen();
+    case 2:
+      return const JobPostsScreen();
+    case 3:
+      return const ApplicationsScreen();
+    case 4:
+      return const TalentPoolScreen();
+    case 5:
+      return const CompaniesScreen();
+    case 6:
+      return const IndustriesScreen();
+    case 7:
+      return const EmploymentTypesScreen();
+    case 8:
+      return const SkillsScreen();
+    case 9:
+      return const CountriesScreen();
+    case 10:
+      return const CitiesScreen();
+    case 11:
+      return const ApplicationStatusesScreen();
+    case 12:
+      return const CareerTipsScreen();
+    default:
+      return const DashboardScreen();
+  }
+}
+
 class AdminShell extends StatefulWidget {
   const AdminShell({super.key});
 
@@ -100,7 +117,6 @@ class _AdminShellState extends State<AdminShell> {
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().currentUser;
-
     return Scaffold(
       body: Row(
         children: [
@@ -111,9 +127,7 @@ class _AdminShellState extends State<AdminShell> {
                 setState(() => _selectedPageIndex = index),
             onLogout: _confirmLogout,
           ),
-          Expanded(
-            child: IndexedStack(index: _selectedPageIndex, children: _pages),
-          ),
+          Expanded(child: _buildPage(_selectedPageIndex)),
         ],
       ),
     );
@@ -264,8 +278,6 @@ class _SidebarItemState extends State<_SidebarItem> {
   @override
   Widget build(BuildContext context) {
     final selected = widget.isSelected;
-    final hovered = _hovered;
-
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
@@ -278,7 +290,7 @@ class _SidebarItemState extends State<_SidebarItem> {
           decoration: BoxDecoration(
             color: selected
                 ? AppColors.tealMain
-                : hovered
+                : _hovered
                 ? AppColors.sidebarHover
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
