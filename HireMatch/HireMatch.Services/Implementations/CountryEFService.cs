@@ -13,7 +13,14 @@ namespace HireMatch.Services.Implementations
         public CountryEFService(HireMatchDbContext context) : base(context) { }
 
         protected override IQueryable<Country> ApplySearchFilters(IQueryable<Country> query, CountrySearchObject search)
-        {
+    {
+            query = base.ApplySearchFilters(query, search);
+
+            if (!string.IsNullOrWhiteSpace(search?.Name))
+            {
+                query = query.Where(x => x.Name.Contains(search.Name));
+            }
+
             return query.OrderBy(x => x.Name);
         }
     }
