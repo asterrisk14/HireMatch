@@ -13,11 +13,9 @@ class PaymentService {
     };
   }
 
-  /// Traži od backenda da kreira PaymentIntent (cijenu određuje server).
-  /// Vraća clientSecret koji koristi Stripe PaymentSheet.
   Future<String> createPaymentIntent() async {
     final response = await http.post(
-      Uri.parse('${ApiConfig.baseUrl}/api/Payment/create-intent'),
+      Uri.parse('${ApiConfig.baseUrl}/Payment/create-intent'),
       headers: await _headers(),
     );
     if (response.statusCode == 200) {
@@ -27,10 +25,9 @@ class PaymentService {
     throw Exception('Failed to create payment: ${response.body}');
   }
 
-  /// Refund premium članstva.
   Future<void> refundPremium() async {
     final response = await http.post(
-      Uri.parse('${ApiConfig.baseUrl}/api/Payment/refund'),
+      Uri.parse('${ApiConfig.baseUrl}/Payment/refund'),
       headers: await _headers(),
     );
     if (response.statusCode != 200) {

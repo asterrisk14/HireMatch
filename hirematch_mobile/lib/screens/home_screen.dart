@@ -36,7 +36,10 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _load();
     _loadUnreadCount();
-    _pollTimer = Timer.periodic(const Duration(seconds: 15), (_) => _loadUnreadCount());
+    _pollTimer = Timer.periodic(
+      const Duration(seconds: 15),
+      (_) => _loadUnreadCount(),
+    );
   }
 
   @override
@@ -60,7 +63,6 @@ class _HomeScreenState extends State<HomeScreen> {
         // ignore: avoid_print
         print('  - ${r.title} | score=${r.score} | ${r.explanation}');
       }
-      // Fallback: ako nema preporuka (npr. korisnik nema preferencija/vještina), pokaži najnovije
       List<JobPost> latest = [];
       if (recommended.isEmpty) {
         final result = await _jobService.getJobPosts(page: 1, pageSize: 3);
@@ -123,12 +125,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     clipBehavior: Clip.none,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.notifications_outlined, color: Colors.white, size: 28),
+                        icon: const Icon(
+                          Icons.notifications_outlined,
+                          color: Colors.white,
+                          size: 28,
+                        ),
                         onPressed: () async {
                           await Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const NotificationsScreen(),
+                            ),
                           );
-                          // Osvježi broj nakon povratka sa ekrana
                           _loadUnreadCount();
                         },
                       ),
@@ -142,10 +149,17 @@ class _HomeScreenState extends State<HomeScreen> {
                               color: Colors.red,
                               shape: BoxShape.circle,
                             ),
-                            constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                            constraints: const BoxConstraints(
+                              minWidth: 18,
+                              minHeight: 18,
+                            ),
                             child: Text(
                               _unreadCount > 9 ? '9+' : '$_unreadCount',
-                              style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -167,42 +181,52 @@ class _HomeScreenState extends State<HomeScreen> {
               if (_loading)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 30),
-                  child: Center(child: CircularProgressIndicator(color: Colors.white)),
+                  child: Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
                 )
               else if (_recommended.isNotEmpty)
-                ..._recommended.map((rec) => _RecommendedCard(
-                  job: rec,
-                  isSaved: favourites.isFavourite(rec.id),
-                  onSaveToggle: () => _toggleSave(rec.id),
-                  onTap: () async {
-                    try {
-                      final job = await _jobService.getJobById(rec.id);
-                      if (!context.mounted) return;
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => JobDetailScreen(job: job)),
-                      );
-                    } catch (_) {}
-                  },
-                ))
+                ..._recommended.map(
+                  (rec) => _RecommendedCard(
+                    job: rec,
+                    isSaved: favourites.isFavourite(rec.id),
+                    onSaveToggle: () => _toggleSave(rec.id),
+                    onTap: () async {
+                      try {
+                        final job = await _jobService.getJobById(rec.id);
+                        if (!context.mounted) return;
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => JobDetailScreen(job: job),
+                          ),
+                        );
+                      } catch (_) {}
+                    },
+                  ),
+                )
               else if (_jobs.isNotEmpty)
-                  ..._jobs.map((job) => JobCard(
+                ..._jobs.map(
+                  (job) => JobCard(
                     job: job,
                     isSaved: favourites.isFavourite(job.id),
                     onSaveToggle: () => _toggleSave(job.id),
                     onTap: () {
                       Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => JobDetailScreen(job: job)),
+                        MaterialPageRoute(
+                          builder: (_) => JobDetailScreen(job: job),
+                        ),
                       );
                     },
-                  ))
-                else
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: Text(
-                      'No recommendations yet. Add skills and preferences to your profile to get matched.',
-                      style: TextStyle(color: Colors.white.withOpacity(0.8)),
-                    ),
                   ),
+                )
+              else
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Text(
+                    'No recommendations yet. Add skills and preferences to your profile to get matched.',
+                    style: TextStyle(color: Colors.white.withOpacity(0.8)),
+                  ),
+                ),
               const SizedBox(height: 16),
               const Text(
                 '💡 Quick Career Tips 🚀',
@@ -216,7 +240,10 @@ class _HomeScreenState extends State<HomeScreen> {
               if (_tips.isEmpty)
                 Text(
                   'No tips available right now.',
-                  style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12),
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 12,
+                  ),
                 )
               else
                 ..._tips.map((tip) => _TipTile(tip: tip)),
@@ -251,12 +278,20 @@ class _TipTile extends StatelessWidget {
               children: [
                 Text(
                   '${tip.icon} ${tip.title}',
-                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppColors.tealDark),
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.tealDark,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   tip.content,
-                  style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.5),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                    height: 1.5,
+                  ),
                 ),
                 const SizedBox(height: 12),
               ],
@@ -318,9 +353,10 @@ class _RecommendedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subtitle = [job.employmentTypeName, job.location]
-        .where((s) => s.isNotEmpty)
-        .join(', ');
+    final subtitle = [
+      job.employmentTypeName,
+      job.location,
+    ].where((s) => s.isNotEmpty).join(', ');
 
     return GestureDetector(
       onTap: onTap,
@@ -345,13 +381,13 @@ class _RecommendedCard extends StatelessWidget {
                   ),
                   child: job.companyLogoUrl.isNotEmpty
                       ? ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      job.companyLogoUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _logoFallback(),
-                    ),
-                  )
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.network(
+                            job.companyLogoUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => _logoFallback(),
+                          ),
+                        )
                       : _logoFallback(),
                 ),
                 const SizedBox(width: 12),
@@ -372,7 +408,10 @@ class _RecommendedCard extends StatelessWidget {
                       if (job.companyName.isNotEmpty)
                         Text(
                           job.companyName,
-                          style: const TextStyle(fontSize: 12, color: Color(0xFF6B7B7B)),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF6B7B7B),
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -394,7 +433,10 @@ class _RecommendedCard extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 4, left: 2),
                 child: Text(
                   subtitle,
-                  style: const TextStyle(fontSize: 12, color: Color(0xFF6B7B7B)),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF6B7B7B),
+                  ),
                 ),
               ),
             const SizedBox(height: 10),
@@ -413,7 +455,11 @@ class _RecommendedCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       job.explanation,
-                      style: const TextStyle(fontSize: 12, color: Color(0xFF2E5E3A), height: 1.4),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF2E5E3A),
+                        height: 1.4,
+                      ),
                     ),
                   ),
                 ],
@@ -429,7 +475,11 @@ class _RecommendedCard extends StatelessWidget {
     return Center(
       child: Text(
         job.title.isNotEmpty ? job.title.substring(0, 1).toUpperCase() : '?',
-        style: const TextStyle(color: Color(0xFF0E7C7C), fontWeight: FontWeight.bold, fontSize: 18),
+        style: const TextStyle(
+          color: Color(0xFF0E7C7C),
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
       ),
     );
   }

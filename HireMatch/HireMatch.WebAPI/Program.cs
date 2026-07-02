@@ -16,7 +16,6 @@ DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Sigurniji CORS (zamijenite localhost sa domenom vašeg frontenda)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policy =>
@@ -28,13 +27,11 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
 
-// Konfiguracija baze
 builder.Services.AddDbContext<HireMatchDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Servisi (uklonjen duplikat IIndustryService)
 builder.Services.AddScoped<ICandidateService, CandidateEFService>();
 builder.Services.AddScoped<IJobPostService, JobPostEFService>();
 builder.Services.AddScoped<ICompanyService, CompanyEFService>();
@@ -54,7 +51,6 @@ builder.Services.AddScoped<IWorkModeService, WorkModeEFService>();
 builder.Services.AddScoped<INotificationService, NotificationEFService>();
 builder.Services.AddSingleton<HireMatch.Services.Messaging.IMessagePublisher, HireMatch.Services.Messaging.RabbitMqPublisher>();
 
-// JWT Autentifikacija
 var tokenKey = Environment.GetEnvironmentVariable("TokenKey") ?? throw new Exception("TokenKey nije definisan u .env");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -68,7 +64,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Spojena Mapster konfiguracija
 TypeAdapterConfig.GlobalSettings.NewConfig<CandidateInsertRequest, MyAppUser>().IgnoreNullValues(true);
 TypeAdapterConfig.GlobalSettings.NewConfig<CandidateUpdateRequest, MyAppUser>().IgnoreNullValues(true);
 TypeAdapterConfig.GlobalSettings.NewConfig<MyAppUser, CandidateResponse>();
@@ -95,7 +90,7 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.MapScalarApiReference();
     app.UseSwagger();
     app.UseSwaggerUI();
     app.MapScalarApiReference();

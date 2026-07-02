@@ -45,12 +45,16 @@ namespace HireMatch.Services.Implementations
                     query = query.Where(x => x.CandidateProfile != null &&
                                              x.CandidateProfile.CurrentTitle.Contains(search.CurrentTitle));
 
-                if (!string.IsNullOrWhiteSpace(search.Keyword))
-                    query = query.Where(x =>
-                        x.FirstName.Contains(search.Keyword) ||
-                        x.LastName.Contains(search.Keyword) ||
-                        x.Email.Contains(search.Keyword));
-            }
+                 if (!string.IsNullOrWhiteSpace(search.Keyword))
+            query = query.Where(x =>
+                x.FirstName.Contains(search.Keyword) ||
+                x.LastName.Contains(search.Keyword) ||
+                x.Email.Contains(search.Keyword));
+
+        if (search.IsPremium.HasValue)
+            query = query.Where(x => x.IsPremium == search.IsPremium.Value);
+    }
+
 
             return query.OrderByDescending(x => x.IsPremium).ThenBy(x => x.FirstName);
         }

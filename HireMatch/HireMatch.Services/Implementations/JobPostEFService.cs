@@ -204,13 +204,13 @@ namespace HireMatch.Services.Implementations
                 if (preferredIndustryId.HasValue && job.IndustryId == preferredIndustryId.Value)
                 {
                     score += 2;
-                    reasons.Add($"odgovara tvojoj industriji ({job.Industry?.Name})");
+                    reasons.Add($"matches your preferred industry ({job.Industry?.Name})");
                 }
 
                 if (preferredTypeId.HasValue && job.EmploymentTypeId == preferredTypeId.Value)
                 {
                     score += 1;
-                    reasons.Add($"odgovara željenom tipu rada ({job.EmploymentType?.Name})");
+                    reasons.Add($"matches your preferred employment type ({job.EmploymentType?.Name})");
                 }
 
                 var jobSkillNames = job.JobPostSkills
@@ -222,7 +222,7 @@ namespace HireMatch.Services.Implementations
                 {
                     score += jobSkillNames.Count;
                     var skillsText = string.Join(", ", jobSkillNames);
-                    reasons.Add($"{jobSkillNames.Count} vještina se poklapa ({skillsText})");
+                    reasons.Add($"{jobSkillNames.Count} skills match ({skillsText})");
                 }
 
                 if (score > 0)
@@ -237,8 +237,8 @@ namespace HireMatch.Services.Implementations
                         EmploymentTypeName = job.EmploymentType?.Name ?? string.Empty,
                         ExpiryDate = job.ExpiryDate,
                         Score = score,
-                        Explanation = "Preporučeno jer " + string.Join("; ", reasons) + ".",
-                    });
+                        Explanation = "Recommended because " + string.Join("; ", reasons) + ".",
+                        });
                 }
             }
 
