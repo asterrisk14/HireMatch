@@ -26,7 +26,6 @@ namespace HireMatch.Services.Implementations
             _dbSet = _dbContext.Set<TEntity>();
         }
 
-        
         protected virtual IQueryable<TEntity> ApplySearchFilters(IQueryable<TEntity> query, TSearch search)
         {
             return query;
@@ -34,8 +33,10 @@ namespace HireMatch.Services.Implementations
 
         public virtual async Task<PagedResult<TResponse>> Get(TSearch search)
         {
-            var query = _dbSet.AsNoTracking(); 
+            var query = _dbSet.AsNoTracking();
             query = ApplySearchFilters(query, search);
+
+            query = query.OrderBy(x => EF.Property<object>(x, "Id"));
 
             var result = new PagedResult<TResponse>();
 
@@ -46,8 +47,9 @@ namespace HireMatch.Services.Implementations
 
             if (search?.Page.HasValue == true && search.PageSize.HasValue)
             {
-                query = query.Skip((search.Page.Value - 1) * search.PageSize.Value)
-                             .Take(search.PageSize.Value);
+                int pageSize = Math.Min(search.PageSize.Value, 100);
+                query = query.Skip((search.Page.Value - 1) * pageSize)
+                             .Take(pageSize);
             }
 
             var entities = await query.ToListAsync();
@@ -81,7 +83,7 @@ namespace HireMatch.Services.Implementations
             if (entity == null) return null;
 
             request.Adapt(entity);
-            
+
             _dbSet.Update(entity);
             await _dbContext.SaveChangesAsync();
 
@@ -100,7 +102,7 @@ namespace HireMatch.Services.Implementations
 
         protected virtual TResponse MapToResponse(TEntity entity)
         {
-         return entity.Adapt<TResponse>();
+            return entity.Adapt<TResponse>();
         }
     }
 }

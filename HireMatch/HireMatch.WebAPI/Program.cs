@@ -6,7 +6,6 @@ using HireMatch.Services.Interfaces;
 using HireMatch.Services.Implementations;
 using HireMatch.Model.Requests;
 using HireMatch.Model.Responses;
-using HireMatch.Services.Database;
 using DotNetEnv;
 using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -17,24 +16,25 @@ DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Sigurniji CORS (zamijenite localhost sa domenom vašeg frontenda)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policy =>
     {
-        policy.AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowAnyOrigin();
+        policy.WithOrigins("http://localhost:4200") 
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
 });
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
+// Konfiguracija baze
 builder.Services.AddDbContext<HireMatchDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddScoped<DbContext>(provider => provider.GetRequiredService<HireMatchDbContext>());
-
+// Servisi (uklonjen duplikat IIndustryService)
 builder.Services.AddScoped<ICandidateService, CandidateEFService>();
 builder.Services.AddScoped<IJobPostService, JobPostEFService>();
 builder.Services.AddScoped<ICompanyService, CompanyEFService>();
@@ -50,13 +50,12 @@ builder.Services.AddScoped<ISkillService, SkillEFService>();
 builder.Services.AddScoped<ICountryService, CountryEFService>();
 builder.Services.AddScoped<ICityService, CityEFService>();
 builder.Services.AddScoped<ICareerTipService, CareerTipEFService>();
-builder.Services.AddScoped<IIndustryService, IndustryEFService>();
 builder.Services.AddScoped<IWorkModeService, WorkModeEFService>();
 builder.Services.AddScoped<INotificationService, NotificationEFService>();
 builder.Services.AddSingleton<HireMatch.Services.Messaging.IMessagePublisher, HireMatch.Services.Messaging.RabbitMqPublisher>();
 
-// 3. Dodavanje JWT Autentifikacije
-var tokenKey = builder.Configuration["TokenKey"] ?? "OvoJeMojSuperTajniIPredugackiKljucZaGenerisanjeTokena1234567890!";
+// JWT Autentifikacija
+var tokenKey = Environment.GetEnvironmentVariable("TokenKey") ?? throw new Exception("TokenKey nije definisan u .env");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -69,7 +68,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Mapster konfiguracija
+// Spojena Mapster konfiguracija
 TypeAdapterConfig.GlobalSettings.NewConfig<CandidateInsertRequest, MyAppUser>().IgnoreNullValues(true);
 TypeAdapterConfig.GlobalSettings.NewConfig<CandidateUpdateRequest, MyAppUser>().IgnoreNullValues(true);
 TypeAdapterConfig.GlobalSettings.NewConfig<MyAppUser, CandidateResponse>();
@@ -79,27 +78,20 @@ TypeAdapterConfig.GlobalSettings.NewConfig<JobPost, JobPostResponse>();
 TypeAdapterConfig.GlobalSettings.NewConfig<CompanyInsertRequest, Company>().IgnoreNullValues(true);
 TypeAdapterConfig.GlobalSettings.NewConfig<CompanyUpdateRequest, Company>().IgnoreNullValues(true);
 TypeAdapterConfig.GlobalSettings.NewConfig<Company, CompanyResponse>();
+
 TypeAdapterConfig<Application, ApplicationResponse>.NewConfig()
     .Map(dest => dest.JobPostTitle, src => src.JobPost.Title)
     .Map(dest => dest.ApplicationStatusName, src => src.ApplicationStatus.Name)
     .Map(dest => dest.CompanyName, src => src.JobPost.Company.Name)
-    .Map(dest => dest.CompanyLogoUrl, src => src.JobPost.Company.LogoUrl ?? string.Empty);
-TypeAdapterConfig<Application, ApplicationResponse>.NewConfig()
+    .Map(dest => dest.CompanyLogoUrl, src => src.JobPost.Company.LogoUrl ?? string.Empty)
     .Map(dest => dest.CandidateFirstName, src => src.Candidate.FirstName)
     .Map(dest => dest.CandidateLastName, src => src.Candidate.LastName)
-    .Map(dest => dest.CandidateEmail, src => src.Candidate.Email)
-    .Map(dest => dest.JobPostTitle, src => src.JobPost.Title)
-    .Map(dest => dest.ApplicationStatusName, src => src.ApplicationStatus.Name);
+    .Map(dest => dest.CandidateEmail, src => src.Candidate.Email);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<HireMatch.Services.Database.HireMatchDbContext>();
-    db.Database.EnsureCreated();
-}
 
 if (app.Environment.IsDevelopment())
 {
@@ -110,11 +102,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("CorsPolicy");
-
 app.UseAuthentication(); 
 app.UseAuthorization();
 app.UseStaticFiles();
-
 app.MapControllers();
 
 app.Run();
