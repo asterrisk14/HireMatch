@@ -52,7 +52,7 @@ const _navGroups = [
       _NavItem('Dashboard', Icons.dashboard_outlined, 0),
       _NavItem('Analytics', Icons.bar_chart_outlined, 1),
       _NavItem('Job Posts', Icons.work_outline, 2),
-      _NavItem('Candidates', Icons.person_outline, 3),
+      _NavItem('Applications', Icons.assignment_outlined, 3),
       _NavItem('Talent Pool', Icons.people_outline, 4),
     ],
   ),
