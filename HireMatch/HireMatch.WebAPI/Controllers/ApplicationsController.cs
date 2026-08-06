@@ -8,6 +8,8 @@ using System.Security.Claims;
 
 namespace HireMatch.WebAPI.Controllers
 {
+    [ApiController]
+    [Route("[controller]")]
     public class ApplicationsController : BaseCRUDController<ApplicationResponse, ApplicationSearchObject, ApplicationInsertRequest, ApplicationUpdateRequest>
     {
         public ApplicationsController(IApplicationService service) : base(service) { }
@@ -15,7 +17,7 @@ namespace HireMatch.WebAPI.Controllers
         [HttpPost]
         [Authorize]
         [Consumes("multipart/form-data")]
-        public new async Task<IActionResult> Post([FromForm] int jobPostId, [FromForm] int applicationStatusId, IFormFile? cvFile)
+        public new async Task<IActionResult> Post([FromForm] int jobPostId, IFormFile? cvFile)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                             ?? User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.NameId)?.Value;
@@ -26,9 +28,17 @@ namespace HireMatch.WebAPI.Controllers
             if (cvFile == null || cvFile.Length == 0)
                 return BadRequest("CV file is required.");
 
+            var allowedExtensions = new[] { ".pdf", ".doc", ".docx" };
+            var ext = Path.GetExtension(cvFile.FileName).ToLowerInvariant();
+            if (!allowedExtensions.Contains(ext))
+                return BadRequest("Only PDF and Word documents are allowed.");
+
+            if (cvFile.Length > 5 * 1024 * 1024)
+                return BadRequest("File size must be under 5MB.");
+
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "cvs");
             Directory.CreateDirectory(uploadsFolder);
-            var fileName = $"{Guid.NewGuid()}_{cvFile.FileName}";
+            var fileName = $"{Guid.NewGuid()}{ext}";
             var filePath = Path.Combine(uploadsFolder, fileName);
             using var stream = new FileStream(filePath, FileMode.Create);
             await cvFile.CopyToAsync(stream);
@@ -38,12 +48,28 @@ namespace HireMatch.WebAPI.Controllers
             {
                 CandidateId = candidateId,
                 JobPostId = jobPostId,
-                ApplicationStatusId = applicationStatusId,
+                ApplicationStatusId = 1,
                 CvUrl = cvUrl
             };
 
             var result = await _crudService.Insert(request);
             return Ok(result);
+        }
+
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
+        public override async Task<IActionResult> Put(int id, [FromBody] ApplicationUpdateRequest request)
+        {
+            var result = await _crudService.Update(id, request);
+            return Ok(result);
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+        public override async Task<IActionResult> Delete(int id)
+        {
+            await _crudService.Delete(id);
+            return NoContent();
         }
     }
 }
