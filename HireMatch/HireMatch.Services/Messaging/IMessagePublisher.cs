@@ -2,6 +2,6 @@
 {
     public interface IMessagePublisher
     {
-        void PublishEmail(EmailMessage message);
+        Task PublishEmail(EmailMessage message);
     }
 }

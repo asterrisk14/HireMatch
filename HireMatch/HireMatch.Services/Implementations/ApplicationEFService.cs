@@ -109,7 +109,7 @@ namespace HireMatch.Services.Implementations
 
                     if (candidate != null && !string.IsNullOrEmpty(candidate.Email))
                     {
-                        _publisher.PublishEmail(new EmailMessage
+                        await _publisher.PublishEmail(new EmailMessage
                         {
                             ToEmail = candidate.Email,
                             Subject = "Application status updated",

@@ -12,6 +12,7 @@ namespace HireMatch.Model.Requests
         public int? CityId { get; set; }
         public int? WorkModeId { get; set; }
         public int EmploymentTypeId { get; set; }
+        public int IndustryId { get; set; }
         public DateTime ExpiryDate { get; set; }
         public List<int> SkillIds { get; set; } = new List<int>();
     }

@@ -153,6 +153,7 @@ namespace HireMatch.Services.Implementations
             entity.WorkModeId = request.WorkModeId;
             entity.Compensation = request.Compensation;
             entity.EmploymentTypeId = request.EmploymentTypeId;
+            entity.IndustryId = request.IndustryId;
             entity.ExpiryDate = request.ExpiryDate;
             entity.UpdatedAt = DateTime.UtcNow;
 

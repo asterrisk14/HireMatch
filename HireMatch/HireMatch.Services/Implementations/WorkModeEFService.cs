@@ -2,12 +2,12 @@ using HireMatch.Model.Responses;
 using HireMatch.Model.SearchObjects;
 using HireMatch.Services.Database;
 using HireMatch.Services.Interfaces;
-using HireMatch.Services.Implementations;
-
+using HireMatch.Model.Requests;
+using Microsoft.EntityFrameworkCore;
+using HireMatch.Services;
 namespace HireMatch.Services.Implementations
 {
-    public class WorkModeEFService : BaseEFReadService<WorkModeResponse, WorkMode, BaseSearchObject>, IWorkModeService
-    {
-        public WorkModeEFService(HireMatchDbContext context) : base(context) { }
-    }
+public class WorkModeEFService : BaseEFCRUDService<WorkModeResponse, WorkMode, BaseSearchObject, WorkModeInsertRequest, WorkModeUpdateRequest>, IWorkModeService   {
+        public WorkModeEFService(HireMatchDbContext context) : base(context) { }   
+         }
 }

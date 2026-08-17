@@ -16,7 +16,9 @@ namespace HireMatch.Services.Implementations
 
         public TokenService(IConfiguration config)
         {
-            var tokenKey = config["TokenKey"] ?? "OvoJeMojSuperTajniIPredugackiKljucZaGenerisanjeTokena1234567890!";
+            var tokenKey = Environment.GetEnvironmentVariable("TokenKey")
+                ?? config["TokenKey"]
+                ?? throw new InvalidOperationException("TokenKey nije definisan u environment varijablama.");
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKey));
         }
 
@@ -26,7 +28,7 @@ namespace HireMatch.Services.Implementations
             {
                 new Claim(JwtRegisteredClaimNames.NameId, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role ?? "Candidate") 
+                new Claim(ClaimTypes.Role, user.Role ?? "Candidate")
             };
 
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
@@ -34,7 +36,7 @@ namespace HireMatch.Services.Implementations
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddDays(7),
+                Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = creds
             };
 

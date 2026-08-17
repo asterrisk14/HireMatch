@@ -45,7 +45,7 @@ namespace HireMatch.Services.Messaging
             }
         }
 
-        public async void PublishEmail(EmailMessage message)
+        public async Task  PublishEmail(EmailMessage message)
         {
             await EnsureInitializedAsync();
             var json = JsonSerializer.Serialize(message);

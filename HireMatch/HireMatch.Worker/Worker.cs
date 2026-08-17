@@ -24,17 +24,36 @@ public class Worker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var factory = new ConnectionFactory
+        IConnection? connection = null;
+        var retries = 0;
+        while (connection == null && retries < 10)
         {
-            HostName = _config["RabbitMQ:Host"] ?? "localhost",
-            Port = int.TryParse(_config["RabbitMQ:Port"], out var p) ? p : 5672,
-            UserName = _config["RabbitMQ:Username"] ?? "guest",
-            Password = _config["RabbitMQ:Password"] ?? "guest"
-        };
+            try
+            {
+                var factory = new ConnectionFactory
+                {
+                    HostName = _config["RabbitMQ:Host"] ?? "localhost",
+                    Port = int.TryParse(_config["RabbitMQ:Port"], out var p) ? p : 5672,
+                    UserName = _config["RabbitMQ:Username"] ?? "guest",
+                    Password = _config["RabbitMQ:Password"] ?? "guest"
+                };
+                connection = await factory.CreateConnectionAsync(stoppingToken);
+            }
+            catch (Exception ex)
+            {
+                retries++;
+                _logger.LogWarning("RabbitMQ nije dostupan, pokusaj {n}/10. Cekam 5s... {ex}", retries, ex.Message);
+                await Task.Delay(5000, stoppingToken);
+            }
+        }
 
-        using var connection = await factory.CreateConnectionAsync(stoppingToken);
+        if (connection == null)
+        {
+            _logger.LogError("Nije moguce spojiti na RabbitMQ nakon 10 pokusaja.");
+            return;
+        }
+
         using var channel = await connection.CreateChannelAsync(cancellationToken: stoppingToken);
-
         await channel.QueueDeclareAsync(queue: "email_queue", durable: true, exclusive: false, autoDelete: false, cancellationToken: stoppingToken);
 
         var consumer = new AsyncEventingBasicConsumer(channel);
