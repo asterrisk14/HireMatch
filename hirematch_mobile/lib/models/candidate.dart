@@ -45,7 +45,6 @@ class Candidate {
     this.preferredEmploymentTypeName = '',
   });
 
-  // Spojeni prikaz lokacije, npr. "Sarajevo, Bosna i Hercegovina"
   String get locationDisplay {
     final parts = [cityName, countryName].where((s) => s.isNotEmpty).toList();
     return parts.join(', ');
@@ -65,7 +64,9 @@ class Candidate {
       currentTitle: json['currentTitle'] ?? '',
       yearsOfExperience: json['yearsOfExperience'] ?? 0,
       summary: json['summary'] ?? '',
-      skills: (json['skills'] as List<dynamic>? ?? []).map((e) => e.toString()).toList(),
+      skills: (json['skills'] as List<dynamic>? ?? [])
+          .map((e) => e.toString())
+          .toList(),
       linkedInUrl: json['linkedInUrl'] ?? '',
       portfolioUrl: json['portfolioUrl'] ?? '',
       cvUrl: json['cvUrl'] ?? '',

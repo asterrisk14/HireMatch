@@ -59,9 +59,12 @@ class JobService {
     if (keyword != null && keyword.isNotEmpty) params['Keyword'] = keyword;
     if (location != null && location.isNotEmpty) params['Location'] = location;
     if (industryId != null) params['IndustryId'] = industryId.toString();
-    if (employmentTypeId != null) params['EmploymentTypeId'] = employmentTypeId.toString();
+    if (employmentTypeId != null)
+      params['EmploymentTypeId'] = employmentTypeId.toString();
 
-    final uri = Uri.parse('${ApiConfig.baseUrl}/JobPosts').replace(queryParameters: params);
+    final uri = Uri.parse(
+      '${ApiConfig.baseUrl}/JobPosts',
+    ).replace(queryParameters: params);
     final response = await http.get(uri, headers: await _headers());
 
     if (response.statusCode == 200) {
@@ -70,18 +73,16 @@ class JobService {
     throw Exception('Failed to load job posts (${response.statusCode})');
   }
 
-  /// Vraća unique gradove iz kompanija u bazi - za dropdown lokacija
   Future<List<String>> getCities() async {
     final response = await http.get(
-      Uri.parse('${ApiConfig.baseUrl}/Companies?PageSize=200'),
+      Uri.parse('${ApiConfig.baseUrl}/Cities?PageSize=200'),
       headers: await _headers(),
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       final cities = (data['result'] as List<dynamic>)
-          .map((c) => (c['city'] ?? '').toString())
+          .map((c) => (c['name'] ?? '').toString())
           .where((c) => c.isNotEmpty)
-          .toSet()
           .toList();
       cities.sort();
       return cities;
@@ -161,7 +162,9 @@ class JobService {
       'PageSize': '1',
       'Page': '1',
     };
-    final uri = Uri.parse('${ApiConfig.baseUrl}/Applications').replace(queryParameters: params);
+    final uri = Uri.parse(
+      '${ApiConfig.baseUrl}/Applications',
+    ).replace(queryParameters: params);
     final response = await http.get(uri, headers: await _headers());
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -177,7 +180,9 @@ class JobService {
       'PageSize': '50',
       'Page': '1',
     };
-    final uri = Uri.parse('${ApiConfig.baseUrl}/Applications').replace(queryParameters: params);
+    final uri = Uri.parse(
+      '${ApiConfig.baseUrl}/Applications',
+    ).replace(queryParameters: params);
     final response = await http.get(uri, headers: await _headers());
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -233,7 +238,9 @@ class JobService {
     if (response.statusCode == 200) {
       return Candidate.fromJson(jsonDecode(response.body));
     }
-    throw Exception('Failed to update profile (${response.statusCode}): ${response.body}');
+    throw Exception(
+      'Failed to update profile (${response.statusCode}): ${response.body}',
+    );
   }
 
   Future<Candidate> uploadCv(int id, String filePath) async {
@@ -261,7 +268,9 @@ class JobService {
     if (token != null) {
       request.headers['Authorization'] = 'Bearer $token';
     }
-    request.files.add(await http.MultipartFile.fromPath('pictureFile', filePath));
+    request.files.add(
+      await http.MultipartFile.fromPath('pictureFile', filePath),
+    );
 
     final streamedResponse = await request.send();
     final response = await http.Response.fromStream(streamedResponse);
@@ -272,12 +281,7 @@ class JobService {
     throw Exception('Failed to upload picture (${response.statusCode})');
   }
 
-  /// Apliciranje na poziciju + upload CV-a.
-  /// candidateId se NE šalje - backend ga uzima iz JWT tokena.
-  Future<void> applyToJob({
-    required int jobPostId,
-    String? cvFilePath,
-  }) async {
+  Future<void> applyToJob({required int jobPostId, String? cvFilePath}) async {
     final token = await _authService.getToken();
     final uri = Uri.parse('${ApiConfig.baseUrl}/Applications');
     final request = http.MultipartRequest('POST', uri);
@@ -287,14 +291,18 @@ class JobService {
     }
 
     request.fields['jobPostId'] = jobPostId.toString();
-    request.fields['applicationStatusId'] = ApplicationStatusIds.newApplication.toString();
+    request.fields['applicationStatusId'] = ApplicationStatusIds.newApplication
+        .toString();
 
     if (cvFilePath != null) {
-      request.files.add(await http.MultipartFile.fromPath('cvFile', cvFilePath));
+      request.files.add(
+        await http.MultipartFile.fromPath('cvFile', cvFilePath),
+      );
     }
 
     final streamedResponse = await request.send();
-    if (streamedResponse.statusCode != 200 && streamedResponse.statusCode != 201) {
+    if (streamedResponse.statusCode != 200 &&
+        streamedResponse.statusCode != 201) {
       throw Exception('Failed to apply');
     }
   }

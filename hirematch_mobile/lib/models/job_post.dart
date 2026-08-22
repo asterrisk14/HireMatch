@@ -72,9 +72,9 @@ class PagedResult<T> {
   PagedResult({required this.result, required this.totalCount});
 
   factory PagedResult.fromJson(
-      Map<String, dynamic> json,
-      T Function(Map<String, dynamic>) fromJsonT,
-      ) {
+    Map<String, dynamic> json,
+    T Function(Map<String, dynamic>) fromJsonT,
+  ) {
     return PagedResult(
       result: (json['result'] as List<dynamic>? ?? [])
           .map((e) => fromJsonT(e as Map<String, dynamic>))

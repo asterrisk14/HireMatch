@@ -2,7 +2,7 @@
 
 Platforma agencije za posredovanje u zaposljavanju.
 
-- **Backend (REST API):** ASP.NET Core (.NET 10) + SQL Server + RabbitMQ
+- **Backend (REST API):** ASP.NET Core (.NET 8) + SQL Server + RabbitMQ
 - **Admin (desktop):** Flutter Windows desktop
 - **Mobilna aplikacija:** Flutter (kandidati)
 - **Worker servis:** zaseban mikroservis za slanje emailova (RabbitMQ consumer)
@@ -11,7 +11,7 @@ Platforma agencije za posredovanje u zaposljavanju.
 ASP.NET Core Web API, Entity Framework Core, SQL Server, RabbitMQ, MailKit, Stripe (sandbox), Flutter, Docker.
 
 ## Preduslovi
-- .NET 10 SDK
+- .NET 8 SDK
 - Docker Desktop
 - Flutter SDK (sa Windows desktop podrskom)
 - Visual Studio 2022 Build Tools (Desktop development with C++ workload)

@@ -4,6 +4,7 @@ import '../../theme.dart';
 import '../../services/job_service.dart';
 import '../../providers/auth_provider.dart';
 import '../main_navigation.dart';
+import '../../models/job_post.dart';
 
 class OnboardingSkillsScreen extends StatefulWidget {
   final List<int> selectedIndustryIds;
@@ -22,39 +23,31 @@ class OnboardingSkillsScreen extends StatefulWidget {
 class _OnboardingSkillsScreenState extends State<OnboardingSkillsScreen> {
   final JobService _jobService = JobService();
   bool _saving = false;
+  bool _loading = true;
   String? _error;
+  List<Skill> _availableSkills = [];
+  final Set<int> _selectedIds = {};
 
-  static const List<String> _availableSkills = [
-    'Leadership',
-    'Teamwork',
-    'Communication',
-    'Analytical Thinking',
-    'Creativity',
-    'Problem-solving',
-    'Human Resources',
-    'Time Management',
-    'Project Management',
-    'Negotiation',
-    'Data Analysis',
-    'Marketing',
-    'Data Visualization',
-    'Research Skills',
-    'Cybersecurity',
-    'Public Speaking',
-    'Copywriting',
-    'Business Development',
-    '.NET',
-    'Angular',
-    'SQL Server',
-    'JavaScript',
-    'TypeScript',
-    'C#',
-    'Customer Service',
-    'Sales',
-    'Other',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadSkills();
+  }
 
-  final Set<String> _selected = {};
+  Future<void> _loadSkills() async {
+    try {
+      final skills = await _jobService.getSkills();
+      setState(() {
+        _availableSkills = skills;
+        _loading = false;
+      });
+    } catch (_) {
+      setState(() {
+        _error = 'Failed to load skills. Please try again.';
+        _loading = false;
+      });
+    }
+  }
 
   Future<void> _finish() async {
     setState(() {
@@ -66,19 +59,15 @@ class _OnboardingSkillsScreenState extends State<OnboardingSkillsScreen> {
     final candidateId = auth.user?.id;
 
     if (candidateId != null) {
-      // Spremi vještine
-      for (final skillName in _selected) {
+      for (final skill in _availableSkills.where(
+        (s) => _selectedIds.contains(s.id),
+      )) {
         try {
-          await _jobService.addUserSkill(candidateId, skillName);
-        } catch (_) {
-          // ignoriši pojedinačne greške, ne blokira nastavak
-        }
+          await _jobService.addUserSkill(candidateId, skill.name);
+        } catch (_) {}
       }
 
-      // Spremi preferencije za sistem preporuke (prva odabrana industrija i tip rada)
       try {
-        // ignore: avoid_print
-        print('SAVING PREFS: industry=${widget.selectedIndustryIds}, type=${widget.selectedEmploymentTypeIds}');
         await _jobService.updatePreferences(
           candidateId: candidateId,
           preferredIndustryId: widget.selectedIndustryIds.isNotEmpty
@@ -88,18 +77,13 @@ class _OnboardingSkillsScreenState extends State<OnboardingSkillsScreen> {
               ? widget.selectedEmploymentTypeIds.first
               : null,
         );
-        // ignore: avoid_print
-        print('PREFS SAVED OK');
-      } catch (e) {
-        // ignore: avoid_print
-        print('PREFS SAVE ERROR: $e');
-      }
+      } catch (_) {}
     }
 
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const MainNavigation()),
-          (route) => false,
+      (route) => false,
     );
   }
 
@@ -122,7 +106,11 @@ class _OnboardingSkillsScreenState extends State<OnboardingSkillsScreen> {
               const SizedBox(height: 20),
               const Text(
                 'Which skills would you like to highlight?',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.tealDark),
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.tealDark,
+                ),
               ),
               const SizedBox(height: 6),
               const Text(
@@ -131,61 +119,82 @@ class _OnboardingSkillsScreenState extends State<OnboardingSkillsScreen> {
               ),
               const SizedBox(height: 24),
               Expanded(
-                child: SingleChildScrollView(
-                  child: Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: _availableSkills.map((skill) {
-                      final isSelected = _selected.contains(skill);
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            if (isSelected) {
-                              _selected.remove(skill);
-                            } else {
-                              _selected.add(skill);
-                            }
-                          });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: isSelected ? AppColors.tealDark : Colors.white,
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(
-                              color: isSelected ? AppColors.tealDark : AppColors.border,
-                              width: 1.5,
-                            ),
-                          ),
-                          child: Text(
-                            skill,
-                            style: TextStyle(
-                              color: isSelected ? Colors.white : AppColors.textPrimary,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 13,
-                            ),
-                          ),
+                child: _loading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _availableSkills.isEmpty
+                    ? const Center(child: Text('No skills available.'))
+                    : SingleChildScrollView(
+                        child: Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: _availableSkills.map((skill) {
+                            final isSelected = _selectedIds.contains(skill.id);
+                            return GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  if (isSelected) {
+                                    _selectedIds.remove(skill.id);
+                                  } else {
+                                    _selectedIds.add(skill.id);
+                                  }
+                                });
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 18,
+                                  vertical: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? AppColors.tealDark
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? AppColors.tealDark
+                                        : AppColors.border,
+                                    width: 1.5,
+                                  ),
+                                ),
+                                child: Text(
+                                  skill.name,
+                                  style: TextStyle(
+                                    color: isSelected
+                                        ? Colors.white
+                                        : AppColors.textPrimary,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
                         ),
-                      );
-                    }).toList(),
-                  ),
-                ),
+                      ),
               ),
               if (_error != null) ...[
                 const SizedBox(height: 8),
-                Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 12)),
+                Text(
+                  _error!,
+                  style: const TextStyle(color: Colors.red, fontSize: 12),
+                ),
               ],
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: (_selected.isEmpty || _saving) ? null : _finish,
+                  onPressed: (_selectedIds.isEmpty || _saving || _loading)
+                      ? null
+                      : _finish,
                   child: _saving
                       ? const SizedBox(
-                    height: 18,
-                    width: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                  )
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
                       : const Text('Finish'),
                 ),
               ),

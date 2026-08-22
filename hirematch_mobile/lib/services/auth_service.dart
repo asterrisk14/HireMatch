@@ -86,8 +86,6 @@ class AuthService {
       await _saveUser(data);
       return data;
     } else {
-      // ignore: avoid_print
-      print('Register failed: ${response.statusCode} - ${response.body}');
       throw Exception('Registration failed: ${response.body}');
     }
   }

@@ -7,7 +7,7 @@ class ApiEndpoints {
   ApiEndpoints._();
 
   static const String login = '/Account/login';
-
+  static const String analytics = '/Analytics';
   static const String industries = '/Industries';
   static const String jobPosts = '/JobPosts';
   static const String candidates = '/Candidates';
