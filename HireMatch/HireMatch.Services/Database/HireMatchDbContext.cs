@@ -27,7 +27,7 @@ namespace HireMatch.Services.Database
         public DbSet<Skill> Skills { get; set; }
         public DbSet<UserActivityLog> UserActivityLogs { get; set; }
         public DbSet<UserSkill> UserSkills { get; set; }
-
+        public DbSet<PremiumPayment> PremiumPayments { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -65,6 +65,11 @@ namespace HireMatch.Services.Database
                 .HasOne(a => a.JobPost)
                 .WithMany(j => j.Applications) 
                 .HasForeignKey(a => a.JobPostId)
+                .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Application>()
+                .HasOne(a => a.StatusChangedBy)
+                .WithMany()
+                .HasForeignKey(a => a.StatusChangedById)
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Favourite>()
@@ -144,105 +149,118 @@ namespace HireMatch.Services.Database
                 new WorkMode { Id = 2, Name = "Hybrid" },
                 new WorkMode { Id = 3, Name = "On-site" }
             );
-                        
+            modelBuilder.Entity<PremiumPayment>()
+            .HasOne(p => p.User)
+            .WithMany()
+            .HasForeignKey(p => p.UserId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<PremiumPayment>()
+                .HasIndex(p => p.PaymentIntentId)
+                .IsUnique();
+
+            modelBuilder.Entity<PremiumPayment>()
+                .HasIndex(p => p.WebhookEventId)
+                .IsUnique();
+                            
 
             modelBuilder.Entity<Country>().HasData(
-    new Country { Id = 1, Name = "Bosna i Hercegovina" },
-    new Country { Id = 2, Name = "Hrvatska" },
-    new Country { Id = 3, Name = "Srbija" },
-    new Country { Id = 4, Name = "Slovenija" },
-    new Country { Id = 5, Name = "Crna Gora" }
-);
+            new Country { Id = 1, Name = "Bosna i Hercegovina" },
+            new Country { Id = 2, Name = "Hrvatska" },
+            new Country { Id = 3, Name = "Srbija" },
+            new Country { Id = 4, Name = "Slovenija" },
+            new Country { Id = 5, Name = "Crna Gora" }
+        );
 
-modelBuilder.Entity<City>().HasData(
-        new City { Id = 1, Name = "Sarajevo", CountryId = 1 },
-        new City { Id = 2, Name = "Banja Luka", CountryId = 1 },
-        new City { Id = 3, Name = "Mostar", CountryId = 1 },
-        new City { Id = 4, Name = "Tuzla", CountryId = 1 },
-        new City { Id = 5, Name = "Zenica", CountryId = 1 },
-        new City { Id = 6, Name = "Zagreb", CountryId = 2 },
-        new City { Id = 7, Name = "Split", CountryId = 2 },
-        new City { Id = 8, Name = "Rijeka", CountryId = 2 },
-        new City { Id = 9, Name = "Osijek", CountryId = 2 },
-        new City { Id = 10, Name = "Varaždin", CountryId = 2 },
-        new City { Id = 11, Name = "Beograd", CountryId = 3 },
-        new City { Id = 12, Name = "Novi Sad", CountryId = 3 },
-        new City { Id = 13, Name = "Nis", CountryId = 3 },
-        new City { Id = 14, Name = "Kragujevac", CountryId = 3 },
-        new City { Id = 15, Name = "Subotica", CountryId = 3 },
-        new City { Id = 16, Name = "Ljubljana", CountryId = 4 },
-        new City { Id = 17, Name = "Maribor", CountryId = 4 },
-        new City { Id = 18, Name = "Celje", CountryId = 4 },
-        new City { Id = 19, Name = "Kranj", CountryId = 4 },
-        new City { Id = 20, Name = "Koper", CountryId = 4 },
-        new City { Id = 21, Name = "Podgorica", CountryId = 5 },
-        new City { Id = 22, Name = "Nikšic", CountryId = 5 },
-        new City { Id = 23, Name = "Herceg Novi", CountryId = 5 },
-        new City { Id = 24, Name = "Kotor", CountryId = 5 },
-        new City { Id = 25, Name = "Budva", CountryId = 5 }
-);
-
-
-modelBuilder.Entity<EmploymentType>().HasData(
-    new EmploymentType { Id = 1, Name = "Full-time" },
-    new EmploymentType { Id = 2, Name = "Part-time" },
-    new EmploymentType { Id = 3, Name = "Freelance" },
-    new EmploymentType { Id = 4, Name = "Internship" },
-    new EmploymentType { Id = 5, Name = "Remote" },
-    new EmploymentType { Id = 6, Name = "Hybrid" },
-    new EmploymentType { Id = 7, Name = "Contract" }
-);
-
-modelBuilder.Entity<Industry>().HasData(
-    new Industry { Id = 1, Name = "IT" },
-    new Industry { Id = 2, Name = "Marketing" },
-    new Industry { Id = 3, Name = "Finance" },
-    new Industry { Id = 4, Name = "Healthcare" },
-    new Industry { Id = 5, Name = "Engineering" },
-    new Industry { Id = 6, Name = "Beauty & Fashion" },
-    new Industry { Id = 7, Name = "Human Resources" },
-    new Industry { Id = 8, Name = "Education" },
-    new Industry { Id = 9, Name = "Gaming" },
-    new Industry { Id = 10, Name = "Legal" },
-    new Industry { Id = 11, Name = "Manufacturing" },
-    new Industry { Id = 12, Name = "Financial" }
-);
-
-    modelBuilder.Entity<Skill>().HasData(
-        new Skill { Id = 1, Name = ".NET" },
-        new Skill { Id = 2, Name = "Angular" },
-        new Skill { Id = 3, Name = "SQL Server" },
-        new Skill { Id = 4, Name = "JavaScript" },
-        new Skill { Id = 5, Name = "TypeScript" },
-        new Skill { Id = 6, Name = "C#" }
-    );
+        modelBuilder.Entity<City>().HasData(
+                new City { Id = 1, Name = "Sarajevo", CountryId = 1 },
+                new City { Id = 2, Name = "Banja Luka", CountryId = 1 },
+                new City { Id = 3, Name = "Mostar", CountryId = 1 },
+                new City { Id = 4, Name = "Tuzla", CountryId = 1 },
+                new City { Id = 5, Name = "Zenica", CountryId = 1 },
+                new City { Id = 6, Name = "Zagreb", CountryId = 2 },
+                new City { Id = 7, Name = "Split", CountryId = 2 },
+                new City { Id = 8, Name = "Rijeka", CountryId = 2 },
+                new City { Id = 9, Name = "Osijek", CountryId = 2 },
+                new City { Id = 10, Name = "Varaždin", CountryId = 2 },
+                new City { Id = 11, Name = "Beograd", CountryId = 3 },
+                new City { Id = 12, Name = "Novi Sad", CountryId = 3 },
+                new City { Id = 13, Name = "Nis", CountryId = 3 },
+                new City { Id = 14, Name = "Kragujevac", CountryId = 3 },
+                new City { Id = 15, Name = "Subotica", CountryId = 3 },
+                new City { Id = 16, Name = "Ljubljana", CountryId = 4 },
+                new City { Id = 17, Name = "Maribor", CountryId = 4 },
+                new City { Id = 18, Name = "Celje", CountryId = 4 },
+                new City { Id = 19, Name = "Kranj", CountryId = 4 },
+                new City { Id = 20, Name = "Koper", CountryId = 4 },
+                new City { Id = 21, Name = "Podgorica", CountryId = 5 },
+                new City { Id = 22, Name = "Nikšic", CountryId = 5 },
+                new City { Id = 23, Name = "Herceg Novi", CountryId = 5 },
+                new City { Id = 24, Name = "Kotor", CountryId = 5 },
+                new City { Id = 25, Name = "Budva", CountryId = 5 }
+        );
 
 
-    modelBuilder.Entity<MyAppUser>().HasData(
-        new MyAppUser
-        {
-            Id = 1, 
-            FirstName = "Admin",
-            LastName = "System",
-            Email = "admin@hirematch.com",
-            PasswordHash = "$2a$11$JO5M9Y9U1otkWfU2DR92eeNc6eUbdM0nP6YdqfGht90NhNW1mIYxC",
-            Role = "Admin",
-            Phone = "000-000-000",
-            CountryId = null, 
-            CityId = null     
-            
-        }
-    );
-   
-    modelBuilder.Entity<ApplicationStatus>().HasData(
-        new ApplicationStatus { Id = 1, Name = "New" },
-        new ApplicationStatus { Id = 2, Name = "Reviewed" },
-        new ApplicationStatus { Id = 3, Name = "Sent to client" },
-        new ApplicationStatus { Id = 4, Name = "Technical interview" },
-        new ApplicationStatus { Id = 5, Name = "Final stage" },
-        new ApplicationStatus { Id = 6, Name = "Rejected" }
-    );
-            
-        }
-    }
+        modelBuilder.Entity<EmploymentType>().HasData(
+            new EmploymentType { Id = 1, Name = "Full-time" },
+            new EmploymentType { Id = 2, Name = "Part-time" },
+            new EmploymentType { Id = 3, Name = "Freelance" },
+            new EmploymentType { Id = 4, Name = "Internship" },
+            new EmploymentType { Id = 5, Name = "Remote" },
+            new EmploymentType { Id = 6, Name = "Hybrid" },
+            new EmploymentType { Id = 7, Name = "Contract" }
+        );
+
+        modelBuilder.Entity<Industry>().HasData(
+            new Industry { Id = 1, Name = "IT" },
+            new Industry { Id = 2, Name = "Marketing" },
+            new Industry { Id = 3, Name = "Finance" },
+            new Industry { Id = 4, Name = "Healthcare" },
+            new Industry { Id = 5, Name = "Engineering" },
+            new Industry { Id = 6, Name = "Beauty & Fashion" },
+            new Industry { Id = 7, Name = "Human Resources" },
+            new Industry { Id = 8, Name = "Education" },
+            new Industry { Id = 9, Name = "Gaming" },
+            new Industry { Id = 10, Name = "Legal" },
+            new Industry { Id = 11, Name = "Manufacturing" },
+            new Industry { Id = 12, Name = "Financial" }
+        );
+
+            modelBuilder.Entity<Skill>().HasData(
+                new Skill { Id = 1, Name = ".NET" },
+                new Skill { Id = 2, Name = "Angular" },
+                new Skill { Id = 3, Name = "SQL Server" },
+                new Skill { Id = 4, Name = "JavaScript" },
+                new Skill { Id = 5, Name = "TypeScript" },
+                new Skill { Id = 6, Name = "C#" }
+            );
+
+
+            modelBuilder.Entity<MyAppUser>().HasData(
+                new MyAppUser
+                {
+                    Id = 1, 
+                    FirstName = "Admin",
+                    LastName = "System",
+                    Email = "admin@hirematch.com",
+                    PasswordHash = "$2a$11$JO5M9Y9U1otkWfU2DR92eeNc6eUbdM0nP6YdqfGht90NhNW1mIYxC",
+                    Role = "Admin",
+                    Phone = "000-000-000",
+                    CountryId = null, 
+                    CityId = null     
+                    
+                }
+            );
+        
+            modelBuilder.Entity<ApplicationStatus>().HasData(
+                new ApplicationStatus { Id = 1, Name = "New" },
+                new ApplicationStatus { Id = 2, Name = "Reviewed" },
+                new ApplicationStatus { Id = 3, Name = "Sent to client" },
+                new ApplicationStatus { Id = 4, Name = "Technical interview" },
+                new ApplicationStatus { Id = 5, Name = "Final stage" },
+                new ApplicationStatus { Id = 6, Name = "Rejected" }
+            );
+                    
+                }
+            }
 }

@@ -24,6 +24,9 @@ namespace HireMatch.Services.Implementations
             if (search?.CandidateId != null)
                 query = query.Where(f => f.CandidateId == search.CandidateId.Value);
 
+            if (search?.JobPostId != null)
+                query = query.Where(f => f.JobPostId == search.JobPostId.Value);
+
             return query.OrderByDescending(f => f.CreatedAt);
         }
 

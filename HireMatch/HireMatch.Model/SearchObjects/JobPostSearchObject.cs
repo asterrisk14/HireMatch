@@ -4,6 +4,7 @@ namespace HireMatch.Model.SearchObjects
 {
     public class JobPostSearchObject : BaseSearchObject
     {
+        public int? IndustryId { get; set; }
         public int? CompanyId { get; set; }
         public int? RecruiterId { get; set; }
         public int? EmploymentTypeId { get; set; }

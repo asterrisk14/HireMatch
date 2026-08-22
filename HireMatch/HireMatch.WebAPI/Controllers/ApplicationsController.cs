@@ -56,20 +56,18 @@ namespace HireMatch.WebAPI.Controllers
             return Ok(result);
         }
 
-        [HttpPut("{id}")]
+       
+       [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public override async Task<IActionResult> Put(int id, [FromBody] ApplicationUpdateRequest request)
         {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(userIdClaim, out var userId))
+                request.ChangedById = userId;
+
             var result = await _crudService.Update(id, request);
             return Ok(result);
         }
 
-        [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
-        public override async Task<IActionResult> Delete(int id)
-        {
-            await _crudService.Delete(id);
-            return NoContent();
-        }
     }
 }

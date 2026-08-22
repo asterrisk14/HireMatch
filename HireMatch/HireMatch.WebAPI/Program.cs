@@ -51,6 +51,8 @@ builder.Services.AddScoped<IWorkModeService, WorkModeEFService>();
 builder.Services.AddScoped<INotificationService, NotificationEFService>();
 builder.Services.AddSingleton<HireMatch.Services.Messaging.IMessagePublisher, HireMatch.Services.Messaging.RabbitMqPublisher>();
 
+builder.Services.AddHttpContextAccessor();
+
 var tokenKey = Environment.GetEnvironmentVariable("TokenKey") ?? throw new Exception("TokenKey nije definisan u .env");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -88,6 +90,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+app.UseMiddleware<HireMatch.WebAPI.Middlewares.ExceptionMiddleware>();
 
 using (var scope = app.Services.CreateScope())
 {

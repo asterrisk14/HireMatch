@@ -142,14 +142,24 @@ namespace HireMatch.Services.Implementations
             return MapToResponse(updated);
         }
 
+        
+
         public async Task<CandidateResponse?> UpdateProfilePicture(int id, IFormFile file)
         {
             var user = await BaseQuery().FirstOrDefaultAsync(u => u.Id == id);
             if (user == null) return null;
 
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!allowedExtensions.Contains(ext))
+                throw new BusinessException("Only JPG, PNG and WebP images are allowed.");
+
+            if (file.Length > 5 * 1024 * 1024)
+                throw new BusinessException("Image size must be under 5MB.");
+
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "profile-pictures");
             Directory.CreateDirectory(uploadsFolder);
-            var fileName = $"{Guid.NewGuid()}_{file.FileName}";
+            var fileName = $"{Guid.NewGuid()}{ext}";
             var filePath = Path.Combine(uploadsFolder, fileName);
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
@@ -172,9 +182,17 @@ namespace HireMatch.Services.Implementations
             var user = await BaseQuery().FirstOrDefaultAsync(u => u.Id == id);
             if (user == null) return null;
 
+            var allowedExtensions = new[] { ".pdf", ".doc", ".docx" };
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!allowedExtensions.Contains(ext))
+                throw new BusinessException("Only PDF and Word documents are allowed.");
+
+            if (file.Length > 5 * 1024 * 1024)
+                throw new BusinessException("CV size must be under 5MB.");
+
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "cvs");
             Directory.CreateDirectory(uploadsFolder);
-            var fileName = $"{Guid.NewGuid()}_{file.FileName}";
+            var fileName = $"{Guid.NewGuid()}{ext}";
             var filePath = Path.Combine(uploadsFolder, fileName);
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
@@ -191,6 +209,7 @@ namespace HireMatch.Services.Implementations
             await _dbContext.SaveChangesAsync();
             return MapToResponse(user);
         }
+
 
         public override Task<CandidateResponse> Insert(CandidateInsertRequest request)
         {

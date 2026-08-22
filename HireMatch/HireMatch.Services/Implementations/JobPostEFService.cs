@@ -31,6 +31,8 @@ namespace HireMatch.Services.Implementations
             {
                 if (search.CompanyId.HasValue)
                     query = query.Where(x => x.CompanyId == search.CompanyId.Value);
+                if (search.IndustryId.HasValue)
+                    query = query.Where(x => x.IndustryId == search.IndustryId.Value);
 
                 if (search.RecruiterId.HasValue)
                     query = query.Where(x => x.RecruiterId == search.RecruiterId.Value);
@@ -61,6 +63,7 @@ namespace HireMatch.Services.Implementations
                     else
                         query = query.Where(x => x.ExpiryDate <= now);
                 }
+                
 
                 if (!string.IsNullOrWhiteSpace(search.Keyword))
                 {
