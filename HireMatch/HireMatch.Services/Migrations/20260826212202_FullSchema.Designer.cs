@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HireMatch.Services.Migrations
 {
     [DbContext(typeof(HireMatchDbContext))]
-    [Migration("20260826211133_CreateDatabase")]
-    partial class CreateDatabase
+    [Migration("20260826212202_FullSchema")]
+    partial class FullSchema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -132,7 +132,7 @@ namespace HireMatch.Services.Database
                 .HasIndex(p => p.WebhookEventId)
                 .IsUnique();
                             
-
+    
             modelBuilder.Entity<Country>().HasData(
             new Country { Id = 1, Name = "Bosna i Hercegovina" },
             new Country { Id = 2, Name = "Hrvatska" },
@@ -229,7 +229,6 @@ namespace HireMatch.Services.Database
                 new ApplicationStatus { Id = 5, Name = "Final stage" },
                 new ApplicationStatus { Id = 6, Name = "Rejected" }
             );
-
 
                     
                 }
