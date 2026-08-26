@@ -5,7 +5,7 @@
 namespace HireMatch.Services.Migrations
 {
     /// <inheritdoc />
-    public partial class Notifications : Migration
+    public partial class CreateDatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

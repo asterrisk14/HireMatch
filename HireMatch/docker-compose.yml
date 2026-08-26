@@ -3,15 +3,21 @@
     image: mcr.microsoft.com/mssql/server:2022-latest
     ports:
       - "1435:1433"
+    env_file:
+      - .env.docker
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=TvojaJakaLozinka123!
 
   rabbitmq:
     image: rabbitmq:3-management
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   api:
     build:
@@ -34,5 +40,7 @@
     env_file:
       - .env.docker
     depends_on:
-      - sqlserver
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
+      sqlserver:
+        condition: service_started

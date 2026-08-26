@@ -12,15 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HireMatch.Services.Migrations
 {
     [DbContext(typeof(HireMatchDbContext))]
-    [Migration("20260616082823_CompanyJobCityFK_WorkMode")]
-    partial class CompanyJobCityFK_WorkMode
+    [Migration("20260826211133_CreateDatabase")]
+    partial class CreateDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.0")
+                .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -49,6 +49,15 @@ namespace HireMatch.Services.Migrations
                     b.Property<int>("JobPostId")
                         .HasColumnType("int");
 
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("StatusChangedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("StatusChangedById")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ApplicationStatusId");
@@ -56,6 +65,8 @@ namespace HireMatch.Services.Migrations
                     b.HasIndex("CandidateId");
 
                     b.HasIndex("JobPostId");
+
+                    b.HasIndex("StatusChangedById");
 
                     b.ToTable("Applications");
                 });
@@ -201,50 +212,6 @@ namespace HireMatch.Services.Migrations
                     b.HasIndex("SkillId");
 
                     b.ToTable("CandidatePreferences");
-                });
-
-            modelBuilder.Entity("HireMatch.Services.Database.CandidateStatus", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("CandidateStatuses");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Open to full-time"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Open to part-time"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "Open to freelance/contract"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "Open to internship"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Name = "Not actively looking"
-                        });
                 });
 
             modelBuilder.Entity("HireMatch.Services.Database.CareerTip", b =>
@@ -707,6 +674,16 @@ namespace HireMatch.Services.Migrations
                         {
                             Id = 10,
                             Name = "Legal"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Name = "Manufacturing"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Name = "Financial"
                         });
                 });
 
@@ -815,7 +792,7 @@ namespace HireMatch.Services.Migrations
 
                     b.HasIndex("JobPostId");
 
-                    b.ToTable("JobViews");
+                    b.ToTable("JobView");
                 });
 
             modelBuilder.Entity("HireMatch.Services.Database.Message", b =>
@@ -850,7 +827,7 @@ namespace HireMatch.Services.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Message");
                 });
 
             modelBuilder.Entity("HireMatch.Services.Database.MyAppUser", b =>
@@ -860,9 +837,6 @@ namespace HireMatch.Services.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("CandidateStatusId")
-                        .HasColumnType("int");
 
                     b.Property<int?>("CityId")
                         .HasColumnType("int");
@@ -888,6 +862,9 @@ namespace HireMatch.Services.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("LastPaymentIntentId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -901,8 +878,6 @@ namespace HireMatch.Services.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CandidateStatusId");
 
                     b.HasIndex("CityId");
 
@@ -919,7 +894,7 @@ namespace HireMatch.Services.Migrations
                             FirstName = "Admin",
                             IsPremium = false,
                             LastName = "System",
-                            PasswordHash = "Admin123!",
+                            PasswordHash = "$2a$11$JO5M9Y9U1otkWfU2DR92eeNc6eUbdM0nP6YdqfGht90NhNW1mIYxC",
                             Phone = "000-000-000",
                             Role = "Admin"
                         });
@@ -955,6 +930,61 @@ namespace HireMatch.Services.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("HireMatch.Services.Database.PremiumPayment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("ConfirmedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsRefunded")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PaymentIntentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("RefundedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("WebhookEventId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PaymentIntentId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("WebhookEventId")
+                        .IsUnique();
+
+                    b.ToTable("PremiumPayments");
                 });
 
             modelBuilder.Entity("HireMatch.Services.Database.Skill", b =>
@@ -1004,38 +1034,6 @@ namespace HireMatch.Services.Migrations
                             Id = 6,
                             Name = "C#"
                         });
-                });
-
-            modelBuilder.Entity("HireMatch.Services.Database.UserActivityLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("TargetId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TargetType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserActivityLogs");
                 });
 
             modelBuilder.Entity("HireMatch.Services.Database.UserSkill", b =>
@@ -1107,11 +1105,18 @@ namespace HireMatch.Services.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.HasOne("HireMatch.Services.Database.MyAppUser", "StatusChangedBy")
+                        .WithMany()
+                        .HasForeignKey("StatusChangedById")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.Navigation("ApplicationStatus");
 
                     b.Navigation("Candidate");
 
                     b.Navigation("JobPost");
+
+                    b.Navigation("StatusChangedBy");
                 });
 
             modelBuilder.Entity("HireMatch.Services.Database.Candidate", b =>
@@ -1293,13 +1298,13 @@ namespace HireMatch.Services.Migrations
                     b.HasOne("HireMatch.Services.Database.MyAppUser", "Candidate")
                         .WithMany()
                         .HasForeignKey("CandidateId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("HireMatch.Services.Database.JobPost", "JobPost")
                         .WithMany("JobViews")
                         .HasForeignKey("JobPostId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Candidate");
@@ -1312,19 +1317,19 @@ namespace HireMatch.Services.Migrations
                     b.HasOne("HireMatch.Services.Database.JobPost", "JobPost")
                         .WithMany("Messages")
                         .HasForeignKey("JobPostId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("HireMatch.Services.Database.MyAppUser", "Receiver")
                         .WithMany()
                         .HasForeignKey("ReceiverId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("HireMatch.Services.Database.MyAppUser", "Sender")
                         .WithMany()
                         .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("JobPost");
@@ -1336,10 +1341,6 @@ namespace HireMatch.Services.Migrations
 
             modelBuilder.Entity("HireMatch.Services.Database.MyAppUser", b =>
                 {
-                    b.HasOne("HireMatch.Services.Database.CandidateStatus", null)
-                        .WithMany("Users")
-                        .HasForeignKey("CandidateStatusId");
-
                     b.HasOne("HireMatch.Services.Database.City", "City")
                         .WithMany("Users")
                         .HasForeignKey("CityId");
@@ -1364,12 +1365,12 @@ namespace HireMatch.Services.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("HireMatch.Services.Database.UserActivityLog", b =>
+            modelBuilder.Entity("HireMatch.Services.Database.PremiumPayment", b =>
                 {
                     b.HasOne("HireMatch.Services.Database.MyAppUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -1392,11 +1393,6 @@ namespace HireMatch.Services.Migrations
                     b.Navigation("Skill");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("HireMatch.Services.Database.CandidateStatus", b =>
-                {
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("HireMatch.Services.Database.City", b =>

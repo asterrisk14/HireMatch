@@ -20,12 +20,9 @@ namespace HireMatch.Services.Database
         public DbSet<Industry> Industries { get; set; }
         public DbSet<JobPost> JobPosts { get; set; }
         public DbSet<JobPostSkill> JobPostSkills { get; set; }
-        public DbSet<JobView> JobViews { get; set; }
-        public DbSet<Message> Messages { get; set; }
         public DbSet<MyAppUser> MyAppUsers { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Skill> Skills { get; set; }
-        public DbSet<UserActivityLog> UserActivityLogs { get; set; }
         public DbSet<UserSkill> UserSkills { get; set; }
         public DbSet<PremiumPayment> PremiumPayments { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -84,36 +81,8 @@ namespace HireMatch.Services.Database
                 .HasForeignKey(f => f.JobPostId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<JobView>()
-                .HasOne(jv => jv.Candidate)
-                .WithMany()
-                .HasForeignKey(jv => jv.CandidateId)
-                .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<JobView>()
-                .HasOne(jv => jv.JobPost)
-                .WithMany(j => j.JobViews)
-                .HasForeignKey(jv => jv.JobPostId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<Message>()
-                .HasOne(m => m.Sender)
-                .WithMany()
-                .HasForeignKey(m => m.SenderId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<Message>()
-                .HasOne(m => m.Receiver)
-                .WithMany()
-                .HasForeignKey(m => m.ReceiverId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<Message>()
-                .HasOne(m => m.JobPost)
-                .WithMany(j => j.Messages)
-                .HasForeignKey(m => m.JobPostId)
-                .OnDelete(DeleteBehavior.NoAction);
-
+           
             modelBuilder.Entity<Candidate>()
                 .HasOne(c => c.City)
                 .WithMany()
@@ -260,6 +229,8 @@ namespace HireMatch.Services.Database
                 new ApplicationStatus { Id = 5, Name = "Final stage" },
                 new ApplicationStatus { Id = 6, Name = "Rejected" }
             );
+
+
                     
                 }
             }

@@ -789,7 +789,7 @@ namespace HireMatch.Services.Migrations
 
                     b.HasIndex("JobPostId");
 
-                    b.ToTable("JobViews");
+                    b.ToTable("JobView");
                 });
 
             modelBuilder.Entity("HireMatch.Services.Database.Message", b =>
@@ -824,7 +824,7 @@ namespace HireMatch.Services.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Message");
                 });
 
             modelBuilder.Entity("HireMatch.Services.Database.MyAppUser", b =>
@@ -1031,38 +1031,6 @@ namespace HireMatch.Services.Migrations
                             Id = 6,
                             Name = "C#"
                         });
-                });
-
-            modelBuilder.Entity("HireMatch.Services.Database.UserActivityLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("TargetId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TargetType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserActivityLogs");
                 });
 
             modelBuilder.Entity("HireMatch.Services.Database.UserSkill", b =>
@@ -1327,13 +1295,13 @@ namespace HireMatch.Services.Migrations
                     b.HasOne("HireMatch.Services.Database.MyAppUser", "Candidate")
                         .WithMany()
                         .HasForeignKey("CandidateId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("HireMatch.Services.Database.JobPost", "JobPost")
                         .WithMany("JobViews")
                         .HasForeignKey("JobPostId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Candidate");
@@ -1346,19 +1314,19 @@ namespace HireMatch.Services.Migrations
                     b.HasOne("HireMatch.Services.Database.JobPost", "JobPost")
                         .WithMany("Messages")
                         .HasForeignKey("JobPostId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("HireMatch.Services.Database.MyAppUser", "Receiver")
                         .WithMany()
                         .HasForeignKey("ReceiverId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("HireMatch.Services.Database.MyAppUser", "Sender")
                         .WithMany()
                         .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("JobPost");
@@ -1400,17 +1368,6 @@ namespace HireMatch.Services.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("HireMatch.Services.Database.UserActivityLog", b =>
-                {
-                    b.HasOne("HireMatch.Services.Database.MyAppUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");

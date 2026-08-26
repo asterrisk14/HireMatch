@@ -14,13 +14,13 @@ namespace HireMatch.WebAPI.Controllers
     {
         public ApplicationsController(IApplicationService service) : base(service) { }
 
-        [HttpPost]
+        [HttpPost("upload")]
         [Authorize]
         [Consumes("multipart/form-data")]
-        public new async Task<IActionResult> Post([FromForm] int jobPostId, IFormFile? cvFile)
+        public async Task<IActionResult> UploadApplication([FromForm] int jobPostId, IFormFile? cvFile)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                            ?? User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.NameId)?.Value;
+                                ?? User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.NameId)?.Value;
 
             if (userIdClaim == null || !int.TryParse(userIdClaim, out var candidateId))
                 return Unauthorized();
@@ -56,8 +56,7 @@ namespace HireMatch.WebAPI.Controllers
             return Ok(result);
         }
 
-       
-       [HttpPut("{id}")]
+        [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public override async Task<IActionResult> Put(int id, [FromBody] ApplicationUpdateRequest request)
         {
@@ -68,6 +67,5 @@ namespace HireMatch.WebAPI.Controllers
             var result = await _crudService.Update(id, request);
             return Ok(result);
         }
-
     }
 }
