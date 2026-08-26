@@ -7,11 +7,10 @@ import 'dart:io' show Platform;
 
 class ApiConfig {
   static String get baseUrl {
-    if (kIsWeb) {
-      return 'http://localhost:5086';
-    } else if (Platform.isAndroid) {
-      return 'http://10.0.2.2:5086';
-    }
+    const envUrl = String.fromEnvironment('API_BASE_URL');
+    if (envUrl.isNotEmpty) return envUrl;
+    if (kIsWeb) return 'http://localhost:5086';
+    if (Platform.isAndroid) return 'http://10.0.2.2:5086';
     return 'http://localhost:5086';
   }
 }
@@ -19,31 +18,48 @@ class ApiConfig {
 class AuthService {
   static const _tokenKey = 'hirematch_token';
   static const _userKey = 'hirematch_user';
+  static const Duration _timeoutDuration = Duration(seconds: 15);
 
   AuthResponse? _currentUser;
   AuthResponse? get currentUser => _currentUser;
 
   Future<void> loadFromStorage() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userJson = prefs.getString(_userKey);
-    if (userJson != null) {
-      _currentUser = AuthResponse.fromJson(jsonDecode(userJson));
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userJson = prefs.getString(_userKey);
+      if (userJson != null) {
+        _currentUser = AuthResponse.fromJson(jsonDecode(userJson));
+      }
+    } catch (e) {
+      await logout();
     }
   }
 
   Future<AuthResponse> login(String email, String password) async {
-    final response = await http.post(
-      Uri.parse('${ApiConfig.baseUrl}/Account/login'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email, 'password': password}),
-    );
+    final response = await http
+        .post(
+          Uri.parse('${ApiConfig.baseUrl}/Account/login'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'email': email, 'password': password}),
+        )
+        .timeout(
+          _timeoutDuration,
+          onTimeout: () => throw Exception(
+            'Connection timed out. Check that the backend is running and reachable.',
+          ),
+        );
 
     if (response.statusCode == 200) {
       final data = AuthResponse.fromJson(jsonDecode(response.body));
       await _saveUser(data);
       return data;
     } else {
-      throw Exception('Invalid email or password');
+      throw Exception(
+        _extractErrorMessage(
+          response.body,
+          fallback: 'Invalid email or password.',
+        ),
+      );
     }
   }
 
@@ -52,7 +68,7 @@ class AuthService {
     required String lastName,
     required String email,
     required String password,
-    required String dateOfBirth, // format: yyyy-MM-dd
+    required String dateOfBirth,
     required int countryId,
     required int cityId,
     String? phone,
@@ -73,12 +89,10 @@ class AuthService {
           }),
         )
         .timeout(
-          const Duration(seconds: 15),
-          onTimeout: () {
-            throw Exception(
-              'Connection timed out. Check that the backend is running and reachable.',
-            );
-          },
+          _timeoutDuration,
+          onTimeout: () => throw Exception(
+            'Connection timed out. Check that the backend is running and reachable.',
+          ),
         );
 
     if (response.statusCode == 200) {
@@ -86,7 +100,9 @@ class AuthService {
       await _saveUser(data);
       return data;
     } else {
-      throw Exception('Registration failed: ${response.body}');
+      throw Exception(
+        _extractErrorMessage(response.body, fallback: 'Registration failed.'),
+      );
     }
   }
 
@@ -109,40 +125,48 @@ class AuthService {
     String newPassword,
   ) async {
     final token = await getToken();
-    final response = await http.post(
-      Uri.parse('${ApiConfig.baseUrl}/Account/change-password'),
-      headers: {
-        'Content-Type': 'application/json',
-        if (token != null) 'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode({
-        'currentPassword': currentPassword,
-        'newPassword': newPassword,
-      }),
-    );
+    final response = await http
+        .post(
+          Uri.parse('${ApiConfig.baseUrl}/Account/change-password'),
+          headers: {
+            'Content-Type': 'application/json',
+            if (token != null) 'Authorization': 'Bearer $token',
+          },
+          body: jsonEncode({
+            'currentPassword': currentPassword,
+            'newPassword': newPassword,
+          }),
+        )
+        .timeout(
+          _timeoutDuration,
+          onTimeout: () => throw Exception('Connection timed out.'),
+        );
 
     if (response.statusCode != 200) {
-      String message = 'Failed to change password.';
-      try {
-        final body = jsonDecode(response.body);
-        if (body is Map && body['message'] != null) message = body['message'];
-      } catch (_) {}
-      throw Exception(message);
+      throw Exception(
+        _extractErrorMessage(
+          response.body,
+          fallback: 'Failed to change password.',
+        ),
+      );
     }
   }
 
-  /// Osvježava isPremium status korisnika sa backenda (poslije plaćanja/refunda).
   Future<void> reloadPremiumStatus() async {
     final user = _currentUser;
     if (user == null) return;
     final token = await getToken();
-    final response = await http.get(
-      Uri.parse('${ApiConfig.baseUrl}/Candidates/${user.id}'),
-      headers: {
-        'Content-Type': 'application/json',
-        if (token != null) 'Authorization': 'Bearer $token',
-      },
-    );
+
+    final response = await http
+        .get(
+          Uri.parse('${ApiConfig.baseUrl}/Candidates/${user.id}'),
+          headers: {
+            'Content-Type': 'application/json',
+            if (token != null) 'Authorization': 'Bearer $token',
+          },
+        )
+        .timeout(_timeoutDuration);
+
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       final isPremium = data['isPremium'] ?? false;
@@ -166,4 +190,14 @@ class AuthService {
   }
 
   bool get isLoggedIn => _currentUser != null;
+
+  String _extractErrorMessage(String responseBody, {required String fallback}) {
+    try {
+      final body = jsonDecode(responseBody);
+      if (body is Map && body['message'] != null)
+        return body['message'].toString();
+      if (body is String && body.isNotEmpty) return body;
+    } catch (_) {}
+    return fallback;
+  }
 }
