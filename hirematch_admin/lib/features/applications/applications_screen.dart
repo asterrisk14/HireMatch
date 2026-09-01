@@ -109,8 +109,9 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
     );
     if (saved == true) {
       await _load();
-      if (mounted)
+      if (mounted) {
         showAppSnackBar(context, 'Application status updated successfully.');
+      }
     }
   }
 
@@ -137,8 +138,9 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
     try {
       await ApplicationsService.delete(application.id);
       await _load();
-      if (mounted)
+      if (mounted) {
         showAppSnackBar(context, 'Application deleted successfully.');
+      }
     } on ApiException catch (e) {
       if (mounted) showAppSnackBar(context, e.message, isError: true);
     }

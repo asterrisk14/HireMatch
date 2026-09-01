@@ -105,7 +105,7 @@ class _JobsScreenState extends State<JobsScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: DropdownButtonFormField<int>(
-                value: _selectedEmploymentTypeId,
+                initialValue: _selectedEmploymentTypeId,
                 decoration: const InputDecoration(
                   prefixIcon: Icon(Icons.work_outline, color: AppColors.textMuted),
                   border: InputBorder.none,

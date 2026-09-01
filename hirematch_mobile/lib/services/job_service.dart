@@ -59,8 +59,9 @@ class JobService {
     if (keyword != null && keyword.isNotEmpty) params['Keyword'] = keyword;
     if (location != null && location.isNotEmpty) params['Location'] = location;
     if (industryId != null) params['IndustryId'] = industryId.toString();
-    if (employmentTypeId != null)
+    if (employmentTypeId != null) {
       params['EmploymentTypeId'] = employmentTypeId.toString();
+    }
 
     final uri = Uri.parse(
       '${ApiConfig.baseUrl}/JobPosts',

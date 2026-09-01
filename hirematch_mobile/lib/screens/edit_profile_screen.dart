@@ -335,7 +335,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               )
             else ...[
               DropdownButtonFormField<int>(
-                value: _selectedCountryId,
+                initialValue: _selectedCountryId,
                 isExpanded: true,
                 decoration: const InputDecoration(labelText: 'Country'),
                 items: _countries
@@ -345,7 +345,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               const SizedBox(height: 14),
               DropdownButtonFormField<int>(
-                value: _selectedCityId,
+                initialValue: _selectedCityId,
                 isExpanded: true,
                 decoration: const InputDecoration(labelText: 'City'),
                 items: _cities
@@ -355,7 +355,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               const SizedBox(height: 14),
               DropdownButtonFormField<int>(
-                value: _selectedIndustryId,
+                initialValue: _selectedIndustryId,
                 isExpanded: true,
                 decoration: const InputDecoration(labelText: 'Preferred industry'),
                 items: _industries
@@ -365,7 +365,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               const SizedBox(height: 14),
               DropdownButtonFormField<int>(
-                value: _selectedEmploymentTypeId,
+                initialValue: _selectedEmploymentTypeId,
                 isExpanded: true,
                 decoration: const InputDecoration(labelText: 'Preferred work type'),
                 items: _employmentTypes

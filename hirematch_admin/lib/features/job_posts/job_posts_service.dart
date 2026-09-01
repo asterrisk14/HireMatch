@@ -91,7 +91,7 @@ class JobPostsService {
               ApiEndpoints.jobPosts,
               query: {
                 if (title != null && title.isNotEmpty) 'Title': title,
-                if (isActive != null) 'IsActive': isActive,
+                'IsActive': ?isActive,
                 'Page': page,
                 'PageSize': pageSize,
                 'RetrieveTotalCount': true,

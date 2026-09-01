@@ -86,7 +86,7 @@ class CandidatesService {
               ApiEndpoints.candidates,
               query: {
                 if (search != null && search.isNotEmpty) 'Keyword': search,
-                if (isPremium != null) 'IsPremium': isPremium,
+                'IsPremium': ?isPremium,
                 'Page': page,
                 'PageSize': pageSize,
                 'RetrieveTotalCount': true,

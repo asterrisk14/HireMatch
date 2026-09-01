@@ -256,7 +256,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 )
               else ...[
                 DropdownButtonFormField<int>(
-                  value: _selectedCountryId,
+                  initialValue: _selectedCountryId,
                   isExpanded: true,
                   decoration: const InputDecoration(labelText: 'Country'),
                   items: _countries
@@ -266,7 +266,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 14),
                 DropdownButtonFormField<int>(
-                  value: _selectedCityId,
+                  initialValue: _selectedCityId,
                   isExpanded: true,
                   decoration: const InputDecoration(labelText: 'City'),
                   items: _cities

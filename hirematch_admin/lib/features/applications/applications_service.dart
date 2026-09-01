@@ -65,9 +65,8 @@ class ApplicationsService {
         await ApiClient.instance.get(
               ApiEndpoints.applications,
               query: {
-                if (jobPostId != null) 'JobPostId': jobPostId,
-                if (applicationStatusId != null)
-                  'ApplicationStatusId': applicationStatusId,
+                'JobPostId': ?jobPostId,
+                'ApplicationStatusId': ?applicationStatusId,
                 'Page': page,
                 'PageSize': pageSize,
                 'RetrieveTotalCount': true,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import '../theme.dart';
 import '../services/job_service.dart';
 import '../services/saved_jobs_service.dart';

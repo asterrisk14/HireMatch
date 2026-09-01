@@ -33,7 +33,7 @@ class CitiesService {
         await ApiClient.instance.get(
               ApiEndpoints.cities,
               query: {
-                if (countryId != null) 'CountryId': countryId,
+                'CountryId': ?countryId,
                 'Page': page,
                 'PageSize': pageSize,
                 'RetrieveTotalCount': true,

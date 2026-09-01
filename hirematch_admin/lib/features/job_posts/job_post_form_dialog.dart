@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../core/network/api_client.dart';
 import '../../shared/widgets/common_widgets.dart';
-import '../auth/auth_provider.dart';
 import '../cities/cities_service.dart';
 import '../companies/companies_service.dart';
 import '../employment_types/employment_types_service.dart';

@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/app_notification.dart';
-import '../constants/app_constants.dart';
 import 'auth_service.dart';
 
 class NotificationService {
