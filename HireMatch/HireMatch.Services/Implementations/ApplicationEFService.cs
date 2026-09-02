@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using HireMatch.Model.Requests;
 using HireMatch.Model.Responses;
@@ -28,6 +26,7 @@ namespace HireMatch.Services.Implementations
             { 5, new List<int>() },
             { 6, new List<int>() },
         };
+
         public ApplicationEFService(HireMatchDbContext context, IMessagePublisher publisher) : base(context)
         {
             _publisher = publisher;
@@ -55,6 +54,22 @@ namespace HireMatch.Services.Implementations
 
         public override async Task<ApplicationResponse> Insert(ApplicationInsertRequest request)
         {
+            var jobPost = await _dbContext.JobPosts.FirstOrDefaultAsync(j => j.Id == request.JobPostId);
+            if (jobPost == null)
+                throw new BusinessException("Job post does not exist.");
+
+            if (jobPost.ExpiryDate < DateTime.UtcNow)
+                throw new BusinessException("This job post has expired and is no longer accepting applications.");
+
+            var candidate = await _dbContext.Candidates.FirstOrDefaultAsync(c => c.MyAppUserId == request.CandidateId);
+            if (candidate == null)
+                throw new BusinessException("Only registered candidates can apply for jobs.");
+
+            var alreadyApplied = await _dbContext.Applications
+                .AnyAsync(a => a.CandidateId == request.CandidateId && a.JobPostId == request.JobPostId);
+            if (alreadyApplied)
+                throw new BusinessException("You have already applied for this job.");
+
             var entity = new Application
             {
                 CandidateId = request.CandidateId,
@@ -66,6 +81,16 @@ namespace HireMatch.Services.Implementations
             };
 
             _dbSet.Add(entity);
+
+            _dbContext.Notifications.Add(new Notification
+            {
+                UserId = request.CandidateId,
+                Type = "ApplicationSubmitted",
+                Message = $"Your application for '{jobPost.Title}' has been submitted successfully.",
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            });
+
             await _dbContext.SaveChangesAsync();
 
             var loaded = await _dbContext.Applications
@@ -92,14 +117,10 @@ namespace HireMatch.Services.Implementations
             if (oldStatusId != newStatusId)
             {
                 if (!_allowedTransitions.TryGetValue(oldStatusId, out var allowed) || !allowed.Contains(newStatusId))
-                {
                     throw new BusinessException($"Status transition from '{application.ApplicationStatus?.Name}' to the selected status is not allowed.");
-                }
 
                 if (newStatusId == 6 && string.IsNullOrWhiteSpace(request.RejectionReason))
-                {
                     throw new BusinessException("Rejection reason is required when rejecting an application.");
-                }
             }
 
             var changedById = request.ChangedById ?? 0;
@@ -116,8 +137,7 @@ namespace HireMatch.Services.Implementations
 
                 if (oldStatusId != newStatusId)
                 {
-                    var newStatus = await _dbContext.ApplicationStatuses
-                        .FirstOrDefaultAsync(s => s.Id == newStatusId);
+                    var newStatus = await _dbContext.ApplicationStatuses.FirstOrDefaultAsync(s => s.Id == newStatusId);
                     var jobTitle = application.JobPost?.Title ?? "a position";
                     var statusName = newStatus?.Name ?? "updated";
 
@@ -140,19 +160,19 @@ namespace HireMatch.Services.Implementations
 
                 if (oldStatusId != newStatusId)
                 {
-                    var candidate = await _dbContext.MyAppUsers.FirstOrDefaultAsync(u => u.Id == application.CandidateId);
+                    var candidateUser = await _dbContext.MyAppUsers.FirstOrDefaultAsync(u => u.Id == application.CandidateId);
                     var statusForEmail = await _dbContext.ApplicationStatuses.FirstOrDefaultAsync(s => s.Id == newStatusId);
                     var jobTitleForEmail = application.JobPost?.Title ?? "a position";
 
-                    if (candidate != null && !string.IsNullOrEmpty(candidate.Email))
+                    if (candidateUser != null && !string.IsNullOrEmpty(candidateUser.Email))
                     {
                         var emailBody = newStatusId == 6
-                            ? $"Hello {candidate.FirstName}, your application for {jobTitleForEmail} was rejected. Reason: {request.RejectionReason}. HireMatch"
-                            : $"Hello {candidate.FirstName}, your application for {jobTitleForEmail} is now: {statusForEmail?.Name ?? "updated"}. HireMatch";
+                            ? $"Hello {candidateUser.FirstName}, your application for {jobTitleForEmail} was rejected. Reason: {request.RejectionReason}. HireMatch"
+                            : $"Hello {candidateUser.FirstName}, your application for {jobTitleForEmail} is now: {statusForEmail?.Name ?? "updated"}. HireMatch";
 
                         await _publisher.PublishEmail(new EmailMessage
                         {
-                            ToEmail = candidate.Email,
+                            ToEmail = candidateUser.Email,
                             Subject = "Application status updated",
                             Body = emailBody
                         });

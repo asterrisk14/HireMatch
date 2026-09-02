@@ -69,6 +69,11 @@ namespace HireMatch.Services.Database
                 .HasForeignKey(a => a.StatusChangedById)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<Application>()
+                .HasIndex(a => new { a.CandidateId, a.JobPostId })
+                .IsUnique();
+
+
             modelBuilder.Entity<Favourite>()
                 .HasOne(f => f.Candidate)
                 .WithMany()
@@ -81,7 +86,7 @@ namespace HireMatch.Services.Database
                 .HasForeignKey(f => f.JobPostId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-
+        
            
             modelBuilder.Entity<Candidate>()
                 .HasOne(c => c.City)
@@ -130,8 +135,8 @@ namespace HireMatch.Services.Database
 
             modelBuilder.Entity<PremiumPayment>()
                 .HasIndex(p => p.WebhookEventId)
-                .IsUnique();
-                            
+                .IsUnique()
+                .HasFilter("[WebhookEventId] IS NOT NULL AND [WebhookEventId] != ''");       
     
             modelBuilder.Entity<Country>().HasData(
             new Country { Id = 1, Name = "Bosna i Hercegovina" },

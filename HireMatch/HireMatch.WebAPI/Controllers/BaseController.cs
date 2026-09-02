@@ -19,7 +19,7 @@ namespace HireMatch.WebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] TSearch search)
+        public virtual async Task<IActionResult> Get([FromQuery] TSearch search)
         {
             var result = await _service.Get(search);
             return Ok(result);

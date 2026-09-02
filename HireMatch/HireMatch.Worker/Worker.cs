@@ -15,6 +15,9 @@ public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
     private readonly IConfiguration _config;
+    private const string QueueName = "email_queue";
+    private const string DeadLetterQueueName = "email_queue_dead";
+    private const string DeadLetterExchange = "email_dead_letter_exchange";
 
     public Worker(ILogger<Worker> logger, IConfiguration config)
     {
@@ -54,7 +57,41 @@ public class Worker : BackgroundService
         }
 
         using var channel = await connection.CreateChannelAsync(cancellationToken: stoppingToken);
-        await channel.QueueDeclareAsync(queue: "email_queue", durable: true, exclusive: false, autoDelete: false, cancellationToken: stoppingToken);
+
+        await channel.ExchangeDeclareAsync(
+            exchange: DeadLetterExchange,
+            type: "direct",
+            durable: true,
+            cancellationToken: stoppingToken);
+
+        await channel.QueueDeclareAsync(
+            queue: DeadLetterQueueName,
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            cancellationToken: stoppingToken);
+
+        await channel.QueueBindAsync(
+            queue: DeadLetterQueueName,
+            exchange: DeadLetterExchange,
+            routingKey: QueueName,
+            cancellationToken: stoppingToken);
+
+        var queueArgs = new Dictionary<string, object?>
+        {
+            { "x-dead-letter-exchange", DeadLetterExchange },
+            { "x-dead-letter-routing-key", QueueName }
+        };
+
+        await channel.QueueDeclareAsync(
+            queue: QueueName,
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments: queueArgs,
+            cancellationToken: stoppingToken);
+
+        await channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false, cancellationToken: stoppingToken);
 
         var consumer = new AsyncEventingBasicConsumer(channel);
         consumer.ReceivedAsync += async (model, ea) =>
@@ -70,22 +107,37 @@ public class Worker : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError("Neispravan format poruke: {ex}", ex.Message);
+                _logger.LogError("Neispravan format poruke, saljem u dead-letter: {ex}", ex.Message);
+                await channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false);
+                return;
             }
 
-            if (email != null)
+            if (email == null)
             {
-                await SendEmailWithRetryAsync(email, stoppingToken);
+                _logger.LogError("Email poruka je null, saljem u dead-letter.");
+                await channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false);
+                return;
+            }
+
+            var success = await SendEmailWithRetryAsync(email, stoppingToken);
+            if (success)
+            {
+                await channel.BasicAckAsync(ea.DeliveryTag, multiple: false);
+            }
+            else
+            {
+                _logger.LogError("Email nije poslan nakon svih pokusaja, saljem u dead-letter: {to}", email.ToEmail);
+                await channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false);
             }
         };
 
-        await channel.BasicConsumeAsync(queue: "email_queue", autoAck: true, consumer: consumer, cancellationToken: stoppingToken);
+        await channel.BasicConsumeAsync(queue: QueueName, autoAck: false, consumer: consumer, cancellationToken: stoppingToken);
 
         _logger.LogInformation("Worker ceka poruke...");
         await Task.Delay(Timeout.Infinite, stoppingToken);
     }
 
-    private async Task SendEmailWithRetryAsync(EmailMessage email, CancellationToken token)
+    private async Task<bool> SendEmailWithRetryAsync(EmailMessage email, CancellationToken token)
     {
         int[] delays = { 1000, 2000, 4000, 8000 };
         for (int attempt = 0; attempt <= delays.Length; attempt++)
@@ -94,19 +146,20 @@ public class Worker : BackgroundService
             {
                 await SendEmailAsync(email, token);
                 _logger.LogInformation("Email poslan na {to}", email.ToEmail);
-                return;
+                return true;
             }
             catch (Exception ex)
             {
                 if (attempt == delays.Length)
                 {
                     _logger.LogError("Email nije poslan nakon {n} pokusaja: {ex}", attempt + 1, ex.Message);
-                    return;
+                    return false;
                 }
                 _logger.LogWarning("Pokusaj {n} neuspjesan, ponavljam za {ms}ms: {ex}", attempt + 1, delays[attempt], ex.Message);
                 await Task.Delay(delays[attempt], token);
             }
         }
+        return false;
     }
 
     private async Task SendEmailAsync(EmailMessage emailMsg, CancellationToken token)

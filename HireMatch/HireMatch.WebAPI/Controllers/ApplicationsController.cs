@@ -14,13 +14,31 @@ namespace HireMatch.WebAPI.Controllers
     {
         public ApplicationsController(IApplicationService service) : base(service) { }
 
+        [HttpGet]
+        [Authorize]
+        public override async Task<IActionResult> Get([FromQuery] ApplicationSearchObject search)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                            ?? User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.NameId)?.Value;
+
+            if (userIdClaim == null || !int.TryParse(userIdClaim, out var userId))
+                return Unauthorized();
+
+            var isAdmin = User.IsInRole("Admin");
+            if (!isAdmin)
+                search.CandidateId = userId;
+
+            var result = await _service.Get(search);
+            return Ok(result);
+        }
+
         [HttpPost("upload")]
         [Authorize]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadApplication([FromForm] int jobPostId, IFormFile? cvFile)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                                ?? User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.NameId)?.Value;
+                            ?? User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.NameId)?.Value;
 
             if (userIdClaim == null || !int.TryParse(userIdClaim, out var candidateId))
                 return Unauthorized();

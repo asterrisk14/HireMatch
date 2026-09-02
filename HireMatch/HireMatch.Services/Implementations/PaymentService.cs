@@ -54,7 +54,7 @@ namespace HireMatch.Services.Implementations
             {
                 UserId = userId,
                 PaymentIntentId = paymentIntent.Id,
-                WebhookEventId = string.Empty,
+                WebhookEventId = null,
                 Amount = totalAmount,
                 Currency = "usd",
                 Status = "pending",

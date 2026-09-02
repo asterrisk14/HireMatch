@@ -12,7 +12,30 @@ namespace HireMatch.WebAPI.Controllers
     [Route("[controller]")]
     public class FavouritesController : BaseCRUDController<FavouriteResponse, FavouriteSearchObject, FavouriteInsertRequest, FavouriteUpdateRequest>
     {
-        public FavouritesController(IFavouriteService service) : base(service) { }
+        private readonly IFavouriteService _favouriteService;
+
+        public FavouritesController(IFavouriteService service) : base(service)
+        {
+            _favouriteService = service;
+        }
+
+        [HttpGet]
+        [Authorize]
+        public override async Task<IActionResult> Get([FromQuery] FavouriteSearchObject search)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                            ?? User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.NameId)?.Value;
+
+            if (userIdClaim == null || !int.TryParse(userIdClaim, out var userId))
+                return Unauthorized();
+
+            var isAdmin = User.IsInRole("Admin");
+            if (!isAdmin)
+                search.CandidateId = userId;
+
+            var result = await _service.Get(search);
+            return Ok(result);
+        }
 
         [HttpPost]
         [Authorize]
@@ -34,6 +57,20 @@ namespace HireMatch.WebAPI.Controllers
         [Authorize]
         public override async Task<IActionResult> Delete(int id)
         {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                            ?? User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.NameId)?.Value;
+
+            if (userIdClaim == null || !int.TryParse(userIdClaim, out var userId))
+                return Unauthorized();
+
+            var favourite = await _favouriteService.GetById(id);
+            if (favourite == null)
+                return NotFound();
+
+            var isAdmin = User.IsInRole("Admin");
+            if (!isAdmin && favourite.CandidateId != userId)
+                return Forbid();
+
             await _crudService.Delete(id);
             return NoContent();
         }
