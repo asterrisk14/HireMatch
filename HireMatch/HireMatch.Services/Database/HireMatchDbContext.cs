@@ -10,7 +10,6 @@ namespace HireMatch.Services.Database
         public DbSet<ApplicationStatus> ApplicationStatuses { get; set; }
         public DbSet<Candidate> Candidates { get; set; }
         public DbSet<WorkMode> WorkModes { get; set; }
-        public DbSet<CandidatePreference> CandidatePreferences { get; set; }
         public DbSet<City> Cities { get; set; }
         public DbSet<Company> Companies { get; set; }
         public DbSet<Country> Countries { get; set; }

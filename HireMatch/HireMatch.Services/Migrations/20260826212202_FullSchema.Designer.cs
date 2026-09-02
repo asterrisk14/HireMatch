@@ -211,7 +211,6 @@ namespace HireMatch.Services.Migrations
 
                     b.HasIndex("SkillId");
 
-                    b.ToTable("CandidatePreferences");
                 });
 
             modelBuilder.Entity("HireMatch.Services.Database.CareerTip", b =>
