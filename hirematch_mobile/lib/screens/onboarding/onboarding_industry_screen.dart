@@ -8,13 +8,14 @@ class OnboardingIndustryScreen extends StatefulWidget {
   const OnboardingIndustryScreen({super.key});
 
   @override
-  State<OnboardingIndustryScreen> createState() => _OnboardingIndustryScreenState();
+  State<OnboardingIndustryScreen> createState() =>
+      _OnboardingIndustryScreenState();
 }
 
 class _OnboardingIndustryScreenState extends State<OnboardingIndustryScreen> {
   final JobService _jobService = JobService();
   List<Industry> _industries = [];
-  final Set<int> _selected = {};
+  int? _selectedId;
   bool _loading = true;
 
   @override
@@ -36,9 +37,11 @@ class _OnboardingIndustryScreenState extends State<OnboardingIndustryScreen> {
   }
 
   void _next() {
+    if (_selectedId == null) return;
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => OnboardingWorkTypeScreen(selectedIndustryIds: _selected.toList()),
+        builder: (_) =>
+            OnboardingWorkTypeScreen(selectedIndustryIds: [_selectedId!]),
       ),
     );
   }
@@ -55,12 +58,16 @@ class _OnboardingIndustryScreenState extends State<OnboardingIndustryScreen> {
               _StepIndicator(step: 1),
               const SizedBox(height: 20),
               const Text(
-                'What industries interest you?',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.tealDark),
+                'What industry interests you?',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.tealDark,
+                ),
               ),
               const SizedBox(height: 6),
               const Text(
-                'Select one or more areas you\'d like to work in',
+                'Select one area you\'d like to work in',
                 style: TextStyle(fontSize: 13, color: AppColors.textMuted),
               ),
               const SizedBox(height: 24),
@@ -72,31 +79,36 @@ class _OnboardingIndustryScreenState extends State<OnboardingIndustryScreen> {
                           spacing: 10,
                           runSpacing: 10,
                           children: _industries.map((industry) {
-                            final isSelected = _selected.contains(industry.id);
+                            final isSelected = _selectedId == industry.id;
                             return GestureDetector(
                               onTap: () {
                                 setState(() {
-                                  if (isSelected) {
-                                    _selected.remove(industry.id);
-                                  } else {
-                                    _selected.add(industry.id);
-                                  }
+                                  _selectedId = industry.id;
                                 });
                               },
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 18,
+                                  vertical: 12,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: isSelected ? AppColors.tealDark : Colors.white,
+                                  color: isSelected
+                                      ? AppColors.tealDark
+                                      : Colors.white,
                                   borderRadius: BorderRadius.circular(24),
                                   border: Border.all(
-                                    color: isSelected ? AppColors.tealDark : AppColors.border,
+                                    color: isSelected
+                                        ? AppColors.tealDark
+                                        : AppColors.border,
                                     width: 1.5,
                                   ),
                                 ),
                                 child: Text(
                                   industry.name,
                                   style: TextStyle(
-                                    color: isSelected ? Colors.white : AppColors.textPrimary,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : AppColors.textPrimary,
                                     fontWeight: FontWeight.w500,
                                     fontSize: 13,
                                   ),
@@ -110,7 +122,7 @@ class _OnboardingIndustryScreenState extends State<OnboardingIndustryScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _selected.isEmpty ? null : _next,
+                  onPressed: _selectedId == null ? null : _next,
                   child: const Text('Continue'),
                 ),
               ),

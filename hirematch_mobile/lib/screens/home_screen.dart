@@ -57,12 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _load() async {
     try {
       final recommended = await _jobService.getRecommended();
-      // ignore: avoid_print
-      print('RECOMMENDED COUNT: ${recommended.length}');
-      for (final r in recommended) {
-        // ignore: avoid_print
-        print('  - ${r.title} | score=${r.score} | ${r.explanation}');
-      }
+
       List<JobPost> latest = [];
       if (recommended.isEmpty) {
         final result = await _jobService.getJobPosts(page: 1, pageSize: 3);

@@ -7,8 +7,11 @@ import 'providers/favoruites_provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_navigation.dart';
 
-
-const String stripePublishableKey = String.fromEnvironment('STRIPE_PUBLISHABLE_KEY', defaultValue: 'pk_test_51Tit6mFNY5ev6BaeGC5lDBEBspWWLYvsahtBOnENeQ9xTKWOncOk9fwoypE4xXkF8rsg7x2FhnxcczbS2ux3RWtG00HsYtisaI');
+const String stripePublishableKey = String.fromEnvironment(
+  'STRIPE_PUBLISHABLE_KEY',
+  defaultValue:
+      'pk_test_51Tit6mFNY5ev6BaeGC5lDBEBspWWLYvsahtBOnENeQ9xTKWOncOk9fwoypE4xXkF8rsg7x2FhnxcczbS2ux3RWtG00HsYtisaI',
+);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,7 +19,7 @@ void main() async {
     Stripe.publishableKey = stripePublishableKey;
     await Stripe.instance.applySettings();
   } catch (e) {
-    print('Stripe init error: $e');
+    // Stripe init failed silently
   }
   runApp(const HireMatchApp());
 }
@@ -66,9 +69,9 @@ class _SplashScreenState extends State<SplashScreen> {
         MaterialPageRoute(builder: (_) => const MainNavigation()),
       );
     } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      );
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen()));
     }
   }
 

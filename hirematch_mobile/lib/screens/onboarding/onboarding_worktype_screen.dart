@@ -6,16 +6,20 @@ import 'onboarding_skills_screen.dart';
 
 class OnboardingWorkTypeScreen extends StatefulWidget {
   final List<int> selectedIndustryIds;
-  const OnboardingWorkTypeScreen({super.key, required this.selectedIndustryIds});
+  const OnboardingWorkTypeScreen({
+    super.key,
+    required this.selectedIndustryIds,
+  });
 
   @override
-  State<OnboardingWorkTypeScreen> createState() => _OnboardingWorkTypeScreenState();
+  State<OnboardingWorkTypeScreen> createState() =>
+      _OnboardingWorkTypeScreenState();
 }
 
 class _OnboardingWorkTypeScreenState extends State<OnboardingWorkTypeScreen> {
   final JobService _jobService = JobService();
   List<EmploymentType> _types = [];
-  final Set<int> _selected = {};
+  int? _selectedId;
   bool _loading = true;
 
   @override
@@ -37,11 +41,12 @@ class _OnboardingWorkTypeScreenState extends State<OnboardingWorkTypeScreen> {
   }
 
   void _next() {
+    if (_selectedId == null) return;
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => OnboardingSkillsScreen(
           selectedIndustryIds: widget.selectedIndustryIds,
-          selectedEmploymentTypeIds: _selected.toList(),
+          selectedEmploymentTypeIds: [_selectedId!],
         ),
       ),
     );
@@ -66,11 +71,15 @@ class _OnboardingWorkTypeScreenState extends State<OnboardingWorkTypeScreen> {
               const SizedBox(height: 20),
               const Text(
                 'How do you prefer to work?',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.tealDark),
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.tealDark,
+                ),
               ),
               const SizedBox(height: 6),
               const Text(
-                'Select your preferred employment types',
+                'Select your preferred employment type',
                 style: TextStyle(fontSize: 13, color: AppColors.textMuted),
               ),
               const SizedBox(height: 24),
@@ -82,39 +91,49 @@ class _OnboardingWorkTypeScreenState extends State<OnboardingWorkTypeScreen> {
                         separatorBuilder: (_, __) => const SizedBox(height: 10),
                         itemBuilder: (context, index) {
                           final type = _types[index];
-                          final isSelected = _selected.contains(type.id);
+                          final isSelected = _selectedId == type.id;
                           return GestureDetector(
                             onTap: () {
                               setState(() {
-                                if (isSelected) {
-                                  _selected.remove(type.id);
-                                } else {
-                                  _selected.add(type.id);
-                                }
+                                _selectedId = type.id;
                               });
                             },
                             child: Container(
                               width: double.infinity,
-                              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                                vertical: 16,
+                              ),
                               decoration: BoxDecoration(
-                                color: isSelected ? AppColors.tealLight : Colors.white,
+                                color: isSelected
+                                    ? AppColors.tealLight
+                                    : Colors.white,
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: isSelected ? AppColors.tealMain : AppColors.border,
+                                  color: isSelected
+                                      ? AppColors.tealMain
+                                      : AppColors.border,
                                   width: 1.5,
                                 ),
                               ),
                               child: Row(
                                 children: [
                                   Icon(
-                                    isSelected ? Icons.check_circle : Icons.circle_outlined,
-                                    color: isSelected ? AppColors.tealMain : AppColors.textMuted,
+                                    isSelected
+                                        ? Icons.check_circle
+                                        : Icons.circle_outlined,
+                                    color: isSelected
+                                        ? AppColors.tealMain
+                                        : AppColors.textMuted,
                                     size: 20,
                                   ),
                                   const SizedBox(width: 12),
                                   Text(
                                     type.name,
-                                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -126,7 +145,7 @@ class _OnboardingWorkTypeScreenState extends State<OnboardingWorkTypeScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _selected.isEmpty ? null : _next,
+                  onPressed: _selectedId == null ? null : _next,
                   child: const Text('Continue'),
                 ),
               ),
