@@ -47,20 +47,16 @@ class SavedJobsService {
   }
 
   Future<List<FavouriteItem>> getFavourites(int candidateId) async {
-    final uri = Uri.parse('${ApiConfig.baseUrl}/Favourites').replace(
-      queryParameters: {
-        'CandidateId': candidateId.toString(),
-        'PageSize': '50',
-        'Page': '1',
-        'RetrieveTotalCount': 'true',
-      },
-    );
+    final uri = Uri.parse('${ApiConfig.baseUrl}/Favourites').replace(queryParameters: {
+      'CandidateId': candidateId.toString(),
+      'PageSize': '50',
+      'Page': '1',
+      'RetrieveTotalCount': 'true',
+    });
     final response = await http.get(uri, headers: await _headers());
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return (data['result'] as List<dynamic>)
-          .map((e) => FavouriteItem.fromJson(e))
-          .toList();
+      return (data['result'] as List<dynamic>).map((e) => FavouriteItem.fromJson(e)).toList();
     }
     return [];
   }

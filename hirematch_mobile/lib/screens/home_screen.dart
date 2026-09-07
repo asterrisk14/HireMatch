@@ -87,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save job: $e')),
+        SnackBar(content: Text(e.toString())),
       );
     }
   }
