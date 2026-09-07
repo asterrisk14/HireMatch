@@ -21,7 +21,7 @@ namespace HireMatch.WebAPI.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public virtual async Task<IActionResult> Post([FromBody] TInsert request)
         {
             var result = await _crudService.Insert(request);
@@ -29,7 +29,7 @@ namespace HireMatch.WebAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public virtual async Task<IActionResult> Put(int id, [FromBody] TUpdate request)
         {
             var result = await _crudService.Update(id, request);

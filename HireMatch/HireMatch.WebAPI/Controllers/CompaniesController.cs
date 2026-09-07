@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using HireMatch.Model.Requests;
 using HireMatch.Model.Responses;
 using HireMatch.Model.SearchObjects;
@@ -13,5 +14,15 @@ namespace HireMatch.WebAPI.Controllers
         public CompaniesController(ICompanyService service) : base(service)
         {
         }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public override async Task<IActionResult> Post([FromBody] CompanyInsertRequest request)
+            => await base.Post(request);
+
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
+        public override async Task<IActionResult> Put(int id, [FromBody] CompanyUpdateRequest request)
+            => await base.Put(id, request);
     }
 }

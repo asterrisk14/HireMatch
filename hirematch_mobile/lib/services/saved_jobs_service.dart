@@ -62,17 +62,27 @@ class SavedJobsService {
   }
 
   Future<void> addFavourite(int candidateId, int jobPostId) async {
-    await http.post(
+    final response = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/Favourites'),
       headers: await _headers(),
       body: jsonEncode({'candidateId': candidateId, 'jobPostId': jobPostId}),
     );
+    _ensureSuccess(response);
   }
 
   Future<void> removeFavourite(int favouriteId) async {
-    await http.delete(
+    final response = await http.delete(
       Uri.parse('${ApiConfig.baseUrl}/Favourites/$favouriteId'),
       headers: await _headers(),
     );
+    _ensureSuccess(response);
+  }
+
+  void _ensureSuccess(http.Response response) {
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception(
+        'Unable to update saved jobs (${response.statusCode}).',
+      );
+    }
   }
 }

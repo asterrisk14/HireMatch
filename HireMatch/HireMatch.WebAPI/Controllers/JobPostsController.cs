@@ -19,6 +19,16 @@ namespace HireMatch.WebAPI.Controllers
             _jobPostService = service;
         }
 
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public override async Task<IActionResult> Post([FromBody] JobPostInsertRequest request)
+            => await base.Post(request);
+
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
+        public override async Task<IActionResult> Put(int id, [FromBody] JobPostUpdateRequest request)
+            => await base.Put(id, request);
+
         [HttpGet("recommended")]
         [Authorize]
         public async Task<IActionResult> GetRecommended()

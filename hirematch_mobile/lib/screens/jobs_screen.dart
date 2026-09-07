@@ -66,7 +66,14 @@ class _JobsScreenState extends State<JobsScreen> {
   Future<void> _toggleSave(int jobId) async {
     final candidateId = context.read<AuthProvider>().user?.id;
     if (candidateId == null) return;
-    await context.read<FavouritesProvider>().toggle(candidateId, jobId);
+    try {
+      await context.read<FavouritesProvider>().toggle(candidateId, jobId);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
   }
 
   @override

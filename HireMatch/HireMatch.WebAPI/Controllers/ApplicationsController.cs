@@ -1,9 +1,11 @@
 using HireMatch.Model.Requests;
 using HireMatch.Model.Responses;
 using HireMatch.Model.SearchObjects;
+using HireMatch.Services.Database;
 using HireMatch.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace HireMatch.WebAPI.Controllers
@@ -12,7 +14,14 @@ namespace HireMatch.WebAPI.Controllers
     [Route("[controller]")]
     public class ApplicationsController : BaseCRUDController<ApplicationResponse, ApplicationSearchObject, ApplicationInsertRequest, ApplicationUpdateRequest>
     {
-        public ApplicationsController(IApplicationService service) : base(service) { }
+        private readonly HireMatchDbContext _context;
+
+        public ApplicationsController(
+            IApplicationService service,
+            HireMatchDbContext context) : base(service)
+        {
+            _context = context;
+        }
 
         [HttpGet]
         [Authorize]
@@ -54,7 +63,7 @@ namespace HireMatch.WebAPI.Controllers
             if (cvFile.Length > 5 * 1024 * 1024)
                 return BadRequest("File size must be under 5MB.");
 
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "cvs");
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "private_uploads", "cvs");
             Directory.CreateDirectory(uploadsFolder);
             var fileName = $"{Guid.NewGuid()}{ext}";
             var filePath = Path.Combine(uploadsFolder, fileName);
@@ -72,6 +81,44 @@ namespace HireMatch.WebAPI.Controllers
 
             var result = await _crudService.Insert(request);
             return Ok(result);
+        }
+
+        [HttpGet("{id}/cv")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DownloadCv(int id)
+        {
+            var application = await _context.Applications
+                .AsNoTracking()
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (application == null || string.IsNullOrWhiteSpace(application.CvUrl))
+                return NotFound();
+
+            var fileName = Path.GetFileName(application.CvUrl);
+            var privatePath = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "private_uploads",
+                "cvs",
+                fileName);
+            var legacyPath = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                "cvs",
+                fileName);
+            var filePath = System.IO.File.Exists(privatePath) ? privatePath : legacyPath;
+
+            if (!System.IO.File.Exists(filePath))
+                return NotFound();
+
+            var contentType = Path.GetExtension(fileName).ToLowerInvariant() switch
+            {
+                ".pdf" => "application/pdf",
+                ".doc" => "application/msword",
+                ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                _ => "application/octet-stream"
+            };
+
+            return PhysicalFile(filePath, contentType, fileName);
         }
 
         [HttpPut("{id}")]
