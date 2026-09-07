@@ -37,7 +37,7 @@ namespace HireMatch.WebAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public virtual async Task<IActionResult> Delete(int id)
         {
             await _crudService.Delete(id);
