@@ -18,6 +18,8 @@ class PaymentService {
       Uri.parse('${ApiConfig.baseUrl}/Payment/create-intent'),
       headers: await _headers(),
     );
+    print('Payment intent status: ${response.statusCode}');
+    print('Payment intent body: ${response.body}');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       return data['clientSecret'] as String;

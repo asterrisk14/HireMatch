@@ -41,6 +41,15 @@ API: http://localhost:5086 | Dokumentacija: http://localhost:5086/scalar
     flutter pub get
     flutter run --dart-define=API_BASE_URL=http://10.0.2.2:5086
 
+### 4. Stripe webhook (za testiranje Premium plaćanja)
+Instaliraj Stripe CLI: https://stripe.com/docs/stripe-cli
+Zatim pokreni:
+
+    stripe login
+    stripe listen --forward-to localhost:5086/api/stripe/webhook
+
+Test kartica: 4242 4242 4242 4242 | Datum: 12/28 | CVC: 123
+
 ## Pristupni podaci
 
 | Kontekst           | Korisnicko ime        | Lozinka   |

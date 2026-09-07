@@ -532,16 +532,6 @@ namespace HireMatch.Services.Migrations
                         },
                         new
                         {
-                            Id = 5,
-                            Name = "Remote"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Name = "Hybrid"
-                        },
-                        new
-                        {
                             Id = 7,
                             Name = "Contract"
                         });
@@ -936,7 +926,6 @@ namespace HireMatch.Services.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("WebhookEventId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -999,6 +988,61 @@ namespace HireMatch.Services.Migrations
                         {
                             Id = 6,
                             Name = "C#"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "Leadership"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "Teamwork"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Name = "Communication"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Name = "Project Management"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Name = "Human Resources"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Name = "Marketing"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Name = "Data Analysis"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Name = "Problem Solving"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Name = "Python"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Name = "Flutter"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Name = "React"
                         });
                 });
 

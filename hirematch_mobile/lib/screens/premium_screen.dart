@@ -86,9 +86,10 @@ class _PremiumScreenState extends State<PremiumScreen> {
         _messageIsError = false;
       });
     } catch (e) {
+      debugPrint('Premium error: $e');
       setState(() {
         _processing = false;
-        _message = e.toString().replaceFirst('Exception: ', '');
+        _message = e.toString();
         _messageIsError = true;
       });
     }
