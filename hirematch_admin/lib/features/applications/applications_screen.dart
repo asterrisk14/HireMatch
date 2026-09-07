@@ -11,6 +11,7 @@ import '../job_posts/job_posts_service.dart';
 import 'application_status_dialog.dart';
 import 'applications_report_pdf.dart';
 import 'applications_service.dart';
+import 'package:printing/printing.dart';
 import 'dart:typed_data';
 
 class ApplicationsScreen extends StatefulWidget {
@@ -120,13 +121,9 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
     if (application.cvUrl.isEmpty) return;
     try {
       final bytes = await ApplicationsService.downloadCv(application.id);
-      final file = File(
-        '${Directory.systemTemp.path}${Platform.pathSeparator}cv-${application.id}.pdf',
-      );
-      await file.writeAsBytes(bytes, flush: true);
-      await launchUrl(
-        Uri.file(file.path),
-        mode: LaunchMode.externalApplication,
+      await Printing.layoutPdf(
+        onLayout: (_) async => Uint8List.fromList(bytes),
+        name: 'cv-${application.id}.pdf',
       );
     } catch (_) {
       if (mounted)

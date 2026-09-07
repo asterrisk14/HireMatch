@@ -3,6 +3,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../config/api_config.dart';
 import 'talent_pool_service.dart';
 import 'dart:io';
+import 'package:printing/printing.dart';
+import 'dart:typed_data';
 
 class CandidateDetailScreen extends StatelessWidget {
   final Candidate candidate;
@@ -24,13 +26,9 @@ class CandidateDetailScreen extends StatelessWidget {
   void _openCv(BuildContext context) async {
     try {
       final bytes = await CandidatesService.downloadCv(candidate.id);
-      final file = File(
-        '${Directory.systemTemp.path}${Platform.pathSeparator}cv-candidate-${candidate.id}.pdf',
-      );
-      await file.writeAsBytes(bytes, flush: true);
-      await launchUrl(
-        Uri.file(file.path),
-        mode: LaunchMode.externalApplication,
+      await Printing.layoutPdf(
+        onLayout: (_) async => Uint8List.fromList(bytes),
+        name: 'cv-candidate-${candidate.id}.pdf',
       );
     } catch (_) {
       if (context.mounted) {
