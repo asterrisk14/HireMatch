@@ -39,11 +39,9 @@ namespace HireMatch.Model.Requests
         public string[] Skills { get; set; } = Array.Empty<string>();
 
         [StringLength(500, ErrorMessage = "LinkedInUrl must be under 500 characters.")]
-        [Url(ErrorMessage = "Invalid URL format.")]
         public string? LinkedInUrl { get; set; }
 
         [StringLength(500, ErrorMessage = "PortfolioUrl must be under 500 characters.")]
-        [Url(ErrorMessage = "Invalid URL format.")]
         public string? PortfolioUrl { get; set; }
     }
 }

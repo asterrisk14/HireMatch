@@ -44,10 +44,8 @@ class _ApplicationStatusDialogState extends State<ApplicationStatusDialog> {
       if (mounted) Navigator.of(context).pop(true);
     } on ApiException catch (e) {
       setState(() => _serverError = e.message);
-    } catch (_) {
-      setState(
-        () => _serverError = 'Unable to save data. Please check your connection.',
-      );
+    } catch (e) {
+      setState(() => _serverError = e.toString());
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -79,8 +77,7 @@ class _ApplicationStatusDialogState extends State<ApplicationStatusDialog> {
                 ),
                 items: widget.statuses
                     .map(
-                      (s) =>
-                          DropdownMenuItem(value: s.id, child: Text(s.name)),
+                      (s) => DropdownMenuItem(value: s.id, child: Text(s.name)),
                     )
                     .toList(),
                 onChanged: (value) => setState(() => _selectedStatusId = value),

@@ -120,22 +120,15 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
     if (application.cvUrl.isEmpty) return;
     try {
       final bytes = await ApplicationsService.downloadCv(application.id);
-      final extension = application.cvUrl.split('.').last;
-      final file = File(
-        '${Directory.systemTemp.path}${Platform.pathSeparator}'
-        'hirematch-application-${application.id}.$extension',
+      await Printing.layoutPdf(
+        onLayout: (format) async => Uint8List.fromList(bytes),
+        name: 'cv-${application.id}.pdf',
       );
-      await file.writeAsBytes(bytes, flush: true);
-      final ok = await launchUrl(file.uri);
-      if (!ok && mounted) {
-        showAppSnackBar(context, 'Unable to open this CV file.', isError: true);
-      }
     } on ApiException catch (e) {
       if (mounted) showAppSnackBar(context, e.message, isError: true);
     } catch (_) {
-      if (mounted) {
-        showAppSnackBar(context, 'Unable to download this CV file.', isError: true);
-      }
+      if (mounted)
+        showAppSnackBar(context, 'Unable to download CV.', isError: true);
     }
   }
 
