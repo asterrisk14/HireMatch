@@ -198,13 +198,24 @@ namespace HireMatch.Services.Database
         );
 
             modelBuilder.Entity<Skill>().HasData(
-                new Skill { Id = 1, Name = ".NET" },
-                new Skill { Id = 2, Name = "Angular" },
-                new Skill { Id = 3, Name = "SQL Server" },
-                new Skill { Id = 4, Name = "JavaScript" },
-                new Skill { Id = 5, Name = "TypeScript" },
-                new Skill { Id = 6, Name = "C#" }
-            );
+    new Skill { Id = 1, Name = ".NET" },
+    new Skill { Id = 2, Name = "Angular" },
+    new Skill { Id = 3, Name = "SQL Server" },
+    new Skill { Id = 4, Name = "JavaScript" },
+    new Skill { Id = 5, Name = "TypeScript" },
+    new Skill { Id = 6, Name = "C#" },
+    new Skill { Id = 7, Name = "Leadership" },
+    new Skill { Id = 8, Name = "Teamwork" },
+    new Skill { Id = 9, Name = "Communication" },
+    new Skill { Id = 10, Name = "Project Management" },
+    new Skill { Id = 11, Name = "Human Resources" },
+    new Skill { Id = 12, Name = "Marketing" },
+    new Skill { Id = 13, Name = "Data Analysis" },
+    new Skill { Id = 14, Name = "Problem Solving" },
+    new Skill { Id = 15, Name = "Python" },
+    new Skill { Id = 16, Name = "Flutter" },
+    new Skill { Id = 17, Name = "React" }
+);
 
 
             modelBuilder.Entity<MyAppUser>().HasData(

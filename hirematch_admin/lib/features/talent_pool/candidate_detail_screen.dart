@@ -26,9 +26,9 @@ class CandidateDetailScreen extends StatelessWidget {
   void _openCv(BuildContext context) async {
     try {
       final bytes = await CandidatesService.downloadCv(candidate.id);
-      await Printing.layoutPdf(
-        onLayout: (_) async => Uint8List.fromList(bytes),
-        name: 'cv-candidate-${candidate.id}.pdf',
+      await Printing.sharePdf(
+        bytes: Uint8List.fromList(bytes),
+        filename: 'cv-candidate-${candidate.id}.pdf',
       );
     } catch (_) {
       if (context.mounted) {

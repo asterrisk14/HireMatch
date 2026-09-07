@@ -121,9 +121,9 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
     if (application.cvUrl.isEmpty) return;
     try {
       final bytes = await ApplicationsService.downloadCv(application.id);
-      await Printing.layoutPdf(
-        onLayout: (_) async => Uint8List.fromList(bytes),
-        name: 'cv-${application.id}.pdf',
+      await Printing.sharePdf(
+        bytes: Uint8List.fromList(bytes),
+        filename: 'cv-${application.id}.pdf',
       );
     } catch (_) {
       if (mounted)

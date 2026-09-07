@@ -174,83 +174,92 @@ namespace HireMatch.Services.Implementations
 
             return MapToResponse(loaded);
         }
+        
+
+
         public async Task<List<RecommendedJobResponse>> GetRecommended(int candidateId, int take = 10)
+{
+    var user = await _dbContext.MyAppUsers
+        .Include(u => u.CandidateProfile)
+        .Include(u => u.UserSkills)
+        .FirstOrDefaultAsync(u => u.Id == candidateId);
+
+    if (user == null)
+        return new List<RecommendedJobResponse>();
+
+    var preferredIndustryId = user.CandidateProfile?.PreferredIndustryId;
+    var preferredTypeId = user.CandidateProfile?.PreferredEmploymentTypeId;
+    var userSkillIds = user.UserSkills.Select(us => us.SkillId).ToHashSet();
+
+    var now = DateTime.UtcNow;
+    var jobs = await _dbContext.JobPosts
+        .Include(j => j.Company)
+        .Include(j => j.EmploymentType)
+        .Include(j => j.Industry)
+        .Include(j => j.City)
+        .Include(j => j.JobPostSkills).ThenInclude(jps => jps.Skill)
+        .Where(j => j.ExpiryDate > now)
+        .ToListAsync();
+
+    var results = new List<RecommendedJobResponse>();
+
+    foreach (var job in jobs)
+    {
+        int score = 0;
+        var reasons = new List<string>();
+
+        bool hasIndustryMatch = preferredIndustryId.HasValue && job.IndustryId == preferredIndustryId.Value;
+        bool hasTypeMatch = preferredTypeId.HasValue && job.EmploymentTypeId == preferredTypeId.Value;
+
+        if (hasIndustryMatch)
         {
-            var user = await _dbContext.MyAppUsers
-                .Include(u => u.CandidateProfile)
-                .Include(u => u.UserSkills)
-                .FirstOrDefaultAsync(u => u.Id == candidateId);
-
-            if (user == null)
-                return new List<RecommendedJobResponse>();
-
-            var preferredIndustryId = user.CandidateProfile?.PreferredIndustryId;
-            var preferredTypeId = user.CandidateProfile?.PreferredEmploymentTypeId;
-            var userSkillIds = user.UserSkills.Select(us => us.SkillId).ToHashSet();
-
-            var now = DateTime.UtcNow;
-            var jobs = await _dbContext.JobPosts
-                .Include(j => j.Company)
-                .Include(j => j.EmploymentType)
-                .Include(j => j.Industry)
-                .Include(j => j.City)
-                .Include(j => j.JobPostSkills).ThenInclude(jps => jps.Skill)
-                .Where(j => j.ExpiryDate > now)
-                .ToListAsync();
-
-            var results = new List<RecommendedJobResponse>();
-
-            foreach (var job in jobs)
-            {
-                int score = 0;
-                var reasons = new List<string>();
-
-                if (preferredIndustryId.HasValue && job.IndustryId == preferredIndustryId.Value)
-                {
-                    score += 2;
-                    reasons.Add($"matches your preferred industry ({job.Industry?.Name})");
-                }
-
-                if (preferredTypeId.HasValue && job.EmploymentTypeId == preferredTypeId.Value)
-                {
-                    score += 1;
-                    reasons.Add($"matches your preferred employment type ({job.EmploymentType?.Name})");
-                }
-
-                var jobSkillNames = job.JobPostSkills
-                    .Where(jps => userSkillIds.Contains(jps.SkillId))
-                    .Select(jps => jps.Skill.Name)
-                    .ToList();
-
-                if (jobSkillNames.Any())
-                {
-                    score += jobSkillNames.Count;
-                    var skillsText = string.Join(", ", jobSkillNames);
-                    reasons.Add($"{jobSkillNames.Count} skills match ({skillsText})");
-                }
-
-                if (score > 0)
-                {
-                    results.Add(new RecommendedJobResponse
-                    {
-                        Id = job.Id,
-                        Title = job.Title,
-                        CompanyName = job.Company?.Name ?? string.Empty,
-                        CompanyLogoUrl = job.Company?.LogoUrl ?? string.Empty,
-                        Location = job.City?.Name ?? string.Empty,
-                        EmploymentTypeName = job.EmploymentType?.Name ?? string.Empty,
-                        ExpiryDate = job.ExpiryDate,
-                        Score = score,
-                        Explanation = "Recommended because " + string.Join("; ", reasons) + ".",
-                        });
-                }
-            }
-
-            return results
-                .OrderByDescending(r => r.Score)
-                .Take(take)
-                .ToList();
+            score += 3;
+            reasons.Add($"matches your preferred industry ({job.Industry?.Name})");
         }
+
+        var jobSkillNames = job.JobPostSkills
+            .Where(jps => userSkillIds.Contains(jps.SkillId))
+            .Select(jps => jps.Skill.Name)
+            .ToList();
+
+        bool hasSkillMatch = jobSkillNames.Any();
+
+        if (hasSkillMatch)
+        {
+            score += jobSkillNames.Count * 2;
+            var skillsText = string.Join(", ", jobSkillNames);
+            reasons.Add($"{jobSkillNames.Count} skills match ({skillsText})");
+        }
+
+        if (hasTypeMatch && (hasIndustryMatch || hasSkillMatch))
+        {
+            score += 1;
+            reasons.Add($"matches your preferred employment type ({job.EmploymentType?.Name})");
+        }
+
+        if (hasIndustryMatch || hasSkillMatch)
+        {
+            results.Add(new RecommendedJobResponse
+            {
+                Id = job.Id,
+                Title = job.Title,
+                CompanyName = job.Company?.Name ?? string.Empty,
+                CompanyLogoUrl = job.Company?.LogoUrl ?? string.Empty,
+                Location = job.City?.Name ?? string.Empty,
+                EmploymentTypeName = job.EmploymentType?.Name ?? string.Empty,
+                ExpiryDate = job.ExpiryDate,
+                Score = score,
+                Explanation = "Recommended because " + string.Join("; ", reasons) + ".",
+            });
+        }
+    }
+
+    return results
+        .OrderByDescending(r => r.Score)
+        .Take(take)
+        .ToList();
+}
+
     }
 
     
