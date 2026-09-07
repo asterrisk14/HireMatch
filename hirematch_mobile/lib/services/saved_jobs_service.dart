@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'auth_service.dart';
+import 'package:flutter/foundation.dart';
 
 class FavouriteItem {
   final int favouriteId;
@@ -47,16 +48,23 @@ class SavedJobsService {
   }
 
   Future<List<FavouriteItem>> getFavourites(int candidateId) async {
-    final uri = Uri.parse('${ApiConfig.baseUrl}/Favourites').replace(queryParameters: {
-      'CandidateId': candidateId.toString(),
-      'PageSize': '50',
-      'Page': '1',
-      'RetrieveTotalCount': 'true',
-    });
+    final uri = Uri.parse('${ApiConfig.baseUrl}/Favourites').replace(
+      queryParameters: {
+        'CandidateId': candidateId.toString(),
+        'PageSize': '50',
+        'Page': '1',
+        'RetrieveTotalCount': 'true',
+      },
+    );
     final response = await http.get(uri, headers: await _headers());
+    print('getFavourites status: ${response.statusCode}');
+    print('getFavourites body: ${response.body}');
+
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return (data['result'] as List<dynamic>).map((e) => FavouriteItem.fromJson(e)).toList();
+      return (data['result'] as List<dynamic>)
+          .map((e) => FavouriteItem.fromJson(e))
+          .toList();
     }
     return [];
   }
@@ -80,9 +88,7 @@ class SavedJobsService {
 
   void _ensureSuccess(http.Response response) {
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw Exception(
-        'Unable to update saved jobs (${response.statusCode}).',
-      );
+      throw Exception('Unable to update saved jobs (${response.statusCode}).');
     }
   }
 }

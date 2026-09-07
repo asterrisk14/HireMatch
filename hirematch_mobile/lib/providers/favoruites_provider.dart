@@ -19,10 +19,17 @@ class FavouritesProvider extends ChangeNotifier {
       _favouriteIdByJobPost.containsKey(jobPostId);
 
   Future<void> toggle(int candidateId, int jobPostId) async {
+    debugPrint(
+      'Toggle: candidateId=$candidateId, jobPostId=$jobPostId, map=$_favouriteIdByJobPost',
+    );
     try {
       if (_favouriteIdByJobPost.containsKey(jobPostId)) {
+        debugPrint(
+          'Removing favourite id: ${_favouriteIdByJobPost[jobPostId]}',
+        );
         await _service.removeFavourite(_favouriteIdByJobPost[jobPostId]!);
       } else {
+        debugPrint('Adding favourite');
         await _service.addFavourite(candidateId, jobPostId);
       }
       await load(candidateId);
