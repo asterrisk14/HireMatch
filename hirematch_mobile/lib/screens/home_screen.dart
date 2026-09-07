@@ -82,7 +82,15 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _toggleSave(int jobId) async {
     final candidateId = context.read<AuthProvider>().user?.id;
     if (candidateId == null) return;
-    await context.read<FavouritesProvider>().toggle(candidateId, jobId);
+    try {
+      await context.read<FavouritesProvider>().toggle(candidateId, jobId);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to save job: $e')));
+      }
+    }
   }
 
   @override
