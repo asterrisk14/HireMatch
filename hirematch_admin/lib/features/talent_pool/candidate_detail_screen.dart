@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../config/api_config.dart';
 import 'talent_pool_service.dart';
+import 'dart:io';
 
 class CandidateDetailScreen extends StatelessWidget {
   final Candidate candidate;
@@ -20,8 +21,24 @@ class CandidateDetailScreen extends StatelessWidget {
     _launch(context, Uri(scheme: 'mailto', path: candidate.email));
   }
 
-  void _openCv(BuildContext context) {
-    _launch(context, Uri.parse('${ApiConfig.baseUrl}${candidate.cvUrl}'));
+  void _openCv(BuildContext context) async {
+    try {
+      final bytes = await CandidatesService.downloadCv(candidate.id);
+      final file = File(
+        '${Directory.systemTemp.path}${Platform.pathSeparator}cv-candidate-${candidate.id}.pdf',
+      );
+      await file.writeAsBytes(bytes, flush: true);
+      await launchUrl(
+        Uri.file(file.path),
+        mode: LaunchMode.externalApplication,
+      );
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Unable to open CV.')));
+      }
+    }
   }
 
   void _openLink(BuildContext context, String url) {

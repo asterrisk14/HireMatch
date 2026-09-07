@@ -52,12 +52,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   String _timeAgo(DateTime dt) {
-    final diff = DateTime.now().difference(dt);
+    final now = DateTime.now();
+    final localDt = dt.isUtc ? dt.toLocal() : dt;
+    final diff = now.difference(localDt);
     if (diff.inMinutes < 1) return 'Just now';
     if (diff.inHours < 1) return '${diff.inMinutes}m ago';
     if (diff.inDays < 1) return '${diff.inHours}h ago';
     if (diff.inDays < 7) return '${diff.inDays}d ago';
-    return '${dt.day}.${dt.month}.${dt.year}';
+    return '${localDt.day}.${localDt.month}.${localDt.year}';
   }
 
   @override

@@ -50,28 +50,29 @@ class Candidate {
   String get fullName => '$firstName $lastName';
 
   factory Candidate.fromJson(Map<String, dynamic> json) => Candidate(
-        id: json['id'],
-        firstName: json['firstName'] ?? '',
-        lastName: json['lastName'] ?? '',
-        email: json['email'] ?? '',
-        phone: json['phone'] ?? '',
-        countryId: json['countryId'],
-        countryName: json['countryName'] ?? '',
-        cityId: json['cityId'],
-        cityName: json['cityName'] ?? '',
-        currentTitle: json['currentTitle'] ?? '',
-        yearsOfExperience: json['yearsOfExperience'] ?? 0,
-        summary: json['summary'] ?? '',
-        skills: (json['skills'] as List?)?.map((e) => e.toString()).toList() ??
-            const [],
-        linkedInUrl: json['linkedInUrl'] ?? '',
-        portfolioUrl: json['portfolioUrl'] ?? '',
-        cvUrl: json['cvUrl'] ?? '',
-        profilePictureUrl: json['profilePictureUrl'] ?? '',
-        isPremium: json['isPremium'] ?? false,
-        preferredIndustryName: json['preferredIndustryName'] ?? '',
-        preferredEmploymentTypeName: json['preferredEmploymentTypeName'] ?? '',
-      );
+    id: json['id'],
+    firstName: json['firstName'] ?? '',
+    lastName: json['lastName'] ?? '',
+    email: json['email'] ?? '',
+    phone: json['phone'] ?? '',
+    countryId: json['countryId'],
+    countryName: json['countryName'] ?? '',
+    cityId: json['cityId'],
+    cityName: json['cityName'] ?? '',
+    currentTitle: json['currentTitle'] ?? '',
+    yearsOfExperience: json['yearsOfExperience'] ?? 0,
+    summary: json['summary'] ?? '',
+    skills:
+        (json['skills'] as List?)?.map((e) => e.toString()).toList() ??
+        const [],
+    linkedInUrl: json['linkedInUrl'] ?? '',
+    portfolioUrl: json['portfolioUrl'] ?? '',
+    cvUrl: json['cvUrl'] ?? '',
+    profilePictureUrl: json['profilePictureUrl'] ?? '',
+    isPremium: json['isPremium'] ?? false,
+    preferredIndustryName: json['preferredIndustryName'] ?? '',
+    preferredEmploymentTypeName: json['preferredEmploymentTypeName'] ?? '',
+  );
 }
 
 class CandidatesService {
@@ -99,5 +100,9 @@ class CandidatesService {
 
   static Future<void> delete(int id) async {
     await ApiClient.instance.delete('${ApiEndpoints.candidates}/$id');
+  }
+
+  static Future<List<int>> downloadCv(int id) async {
+    return ApiClient.instance.getBytes('${ApiEndpoints.candidates}/$id/cv');
   }
 }

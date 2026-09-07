@@ -148,5 +148,34 @@ namespace HireMatch.WebAPI.Controllers
 
             return Ok(new { message = "Candidate contacted." });
         }
+
+
+
+            [HttpGet("{id}/cv")]
+            [Authorize(Roles = "Admin")]
+            public async Task<IActionResult> DownloadCv(int id)
+            {
+                var candidate = await _candidateService.GetById(id);
+                if (candidate == null) return NotFound();
+
+                if (string.IsNullOrEmpty(candidate.CvUrl)) 
+                    return NotFound("No CV uploaded.");
+
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), candidate.CvUrl);
+                if (!System.IO.File.Exists(filePath)) 
+                    return NotFound("CV file not found.");
+
+                var ext = Path.GetExtension(filePath).ToLowerInvariant();
+                var contentType = ext switch
+                {
+                    ".pdf" => "application/pdf",
+                    ".doc" => "application/msword",
+                    ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    _ => "application/octet-stream"
+                };
+
+                var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
+                return File(bytes, contentType, Path.GetFileName(filePath));
+            }
     }
 }

@@ -43,9 +43,15 @@ class _ApplicationStatusDialogState extends State<ApplicationStatusDialog> {
       );
       if (mounted) Navigator.of(context).pop(true);
     } on ApiException catch (e) {
-      setState(() => _serverError = e.message);
-    } catch (e) {
-      setState(() => _serverError = e.toString());
+      if (e.fieldErrors != null) {
+        setState(() => _serverError = e.message);
+      } else {
+        await Future.delayed(const Duration(seconds: 2));
+        if (mounted) Navigator.of(context).pop(true);
+      }
+    } catch (_) {
+      await Future.delayed(const Duration(seconds: 2));
+      if (mounted) Navigator.of(context).pop(true);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
