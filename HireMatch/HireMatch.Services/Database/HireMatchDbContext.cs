@@ -179,8 +179,6 @@ namespace HireMatch.Services.Database
             new EmploymentType { Id = 2, Name = "Part-time" },
             new EmploymentType { Id = 3, Name = "Freelance" },
             new EmploymentType { Id = 4, Name = "Internship" },
-            new EmploymentType { Id = 5, Name = "Remote" },
-            new EmploymentType { Id = 6, Name = "Hybrid" },
             new EmploymentType { Id = 7, Name = "Contract" }
         );
 
