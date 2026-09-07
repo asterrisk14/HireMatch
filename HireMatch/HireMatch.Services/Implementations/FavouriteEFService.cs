@@ -74,5 +74,12 @@ namespace HireMatch.Services.Implementations
 
             return MapToResponse(loaded);
         }
+        public override async Task<FavouriteResponse?> GetById(int id)
+        {
+            var entity = await _dbContext.Favourites
+                .FirstOrDefaultAsync(f => f.Id == id);
+            if (entity == null) return null;
+            return MapToResponse(entity);
+        }
     }
 }
