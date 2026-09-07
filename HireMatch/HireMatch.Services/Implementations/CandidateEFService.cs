@@ -204,7 +204,7 @@ namespace HireMatch.Services.Implementations
                 user.CandidateProfile = new Candidate { MyAppUserId = user.Id };
                 _dbContext.Candidates.Add(user.CandidateProfile);
             }
-            user.CandidateProfile.CvUrl = $"/cvs/{fileName}";
+            user.CandidateProfile.CvUrl = $"private_uploads/cvs/{fileName}";
 
             await _dbContext.SaveChangesAsync();
             return MapToResponse(user);
