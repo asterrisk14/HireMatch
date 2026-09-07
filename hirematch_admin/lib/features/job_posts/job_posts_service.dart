@@ -48,30 +48,30 @@ class JobPost {
   bool get isActive => expiryDate.isAfter(DateTime.now());
 
   factory JobPost.fromJson(Map<String, dynamic> json) => JobPost(
-        id: json['id'],
-        companyId: json['companyId'] ?? 0,
-        companyName: json['companyName'] ?? '',
-        companyLogoUrl: json['companyLogoUrl'] ?? '',
-        title: json['title'] ?? '',
-        description: json['description'] ?? '',
-        compensation: json['compensation'] ?? '',
-        employmentTypeId: json['employmentTypeId'] ?? 0,
-        employmentTypeName: json['employmentTypeName'] ?? '',
-        isPaid: json['isPaid'] ?? false,
-        cityId: json['cityId'],
-        cityName: json['cityName'] ?? '',
-        workModeId: json['workModeId'],
-        workModeName: json['workModeName'] ?? '',
-        expiryDate: json['expiryDate'] != null
-            ? DateTime.parse(json['expiryDate'].toString())
-            : DateTime.now(),
-        createdAt: json['createdAt'] != null
-            ? DateTime.parse(json['createdAt'].toString())
-            : DateTime.now(),
-        industryId: json['industryId'],
-        industryName: json['industryName'] ?? '',
-        applicationCount: json['applicationCount'] ?? 0,
-      );
+    id: json['id'],
+    companyId: json['companyId'] ?? 0,
+    companyName: json['companyName'] ?? '',
+    companyLogoUrl: json['companyLogoUrl'] ?? '',
+    title: json['title'] ?? '',
+    description: json['description'] ?? '',
+    compensation: json['compensation'] ?? '',
+    employmentTypeId: json['employmentTypeId'] ?? 0,
+    employmentTypeName: json['employmentTypeName'] ?? '',
+    isPaid: json['isPaid'] ?? false,
+    cityId: json['cityId'],
+    cityName: json['cityName'] ?? '',
+    workModeId: json['workModeId'],
+    workModeName: json['workModeName'] ?? '',
+    expiryDate: json['expiryDate'] != null
+        ? DateTime.parse(json['expiryDate'].toString())
+        : DateTime.now(),
+    createdAt: json['createdAt'] != null
+        ? DateTime.parse(json['createdAt'].toString())
+        : DateTime.now(),
+    industryId: json['industryId'],
+    industryName: json['industryName'] ?? '',
+    applicationCount: json['applicationCount'] ?? 0,
+  );
 }
 
 class JobPostsService {
@@ -143,6 +143,7 @@ class JobPostsService {
     required int companyId,
     required int recruiterId,
     required int employmentTypeId,
+    required int industryId,
     int? cityId,
     int? workModeId,
     required String compensation,
@@ -161,6 +162,7 @@ class JobPostsService {
                 'workModeId': workModeId,
                 'compensation': compensation,
                 'employmentTypeId': employmentTypeId,
+                'industryId': industryId,
                 'expiryDate': expiryDate.toIso8601String(),
                 'skillIds': skillIds,
               },

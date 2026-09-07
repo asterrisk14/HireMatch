@@ -15,14 +15,20 @@ class FavouritesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool isFavourite(int jobPostId) => _favouriteIdByJobPost.containsKey(jobPostId);
+  bool isFavourite(int jobPostId) =>
+      _favouriteIdByJobPost.containsKey(jobPostId);
 
   Future<void> toggle(int candidateId, int jobPostId) async {
-    if (_favouriteIdByJobPost.containsKey(jobPostId)) {
-      await _service.removeFavourite(_favouriteIdByJobPost[jobPostId]!);
-    } else {
-      await _service.addFavourite(candidateId, jobPostId);
+    try {
+      if (_favouriteIdByJobPost.containsKey(jobPostId)) {
+        await _service.removeFavourite(_favouriteIdByJobPost[jobPostId]!);
+      } else {
+        await _service.addFavourite(candidateId, jobPostId);
+      }
+      await load(candidateId);
+    } catch (e) {
+      debugPrint('Favourite toggle error: $e');
+      rethrow;
     }
-    await load(candidateId);
   }
 }

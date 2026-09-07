@@ -50,15 +50,36 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String? _newCvUrl;
   String? _phoneError;
 
-  static final RegExp _phoneRegex = RegExp(r'^(\+387|0)6[0-9]{7}$');
+  static final RegExp _phoneRegex = RegExp(r'^[\+\d\s\-\(\)]{6,20}$');
 
   static const List<String> _availableSkills = [
-    'Leadership', 'Teamwork', 'Communication', 'Analytical Thinking',
-    'Creativity', 'Problem-solving', 'Human Resources', 'Time Management',
-    'Project Management', 'Negotiation', 'Data Analysis', 'Marketing',
-    'Data Visualization', 'Research Skills', 'Cybersecurity', 'Public Speaking',
-    'Copywriting', 'Business Development', '.NET', 'Angular', 'SQL Server',
-    'JavaScript', 'TypeScript', 'C#', 'Customer Service', 'Sales', 'Other',
+    'Leadership',
+    'Teamwork',
+    'Communication',
+    'Analytical Thinking',
+    'Creativity',
+    'Problem-solving',
+    'Human Resources',
+    'Time Management',
+    'Project Management',
+    'Negotiation',
+    'Data Analysis',
+    'Marketing',
+    'Data Visualization',
+    'Research Skills',
+    'Cybersecurity',
+    'Public Speaking',
+    'Copywriting',
+    'Business Development',
+    '.NET',
+    'Angular',
+    'SQL Server',
+    'JavaScript',
+    'TypeScript',
+    'C#',
+    'Customer Service',
+    'Sales',
+    'Other',
   ];
 
   @override
@@ -69,7 +90,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _lastNameController = TextEditingController(text: c.lastName);
     _phoneController = TextEditingController(text: c.phone);
     _currentTitleController = TextEditingController(text: c.currentTitle);
-    _yearsController = TextEditingController(text: c.yearsOfExperience > 0 ? c.yearsOfExperience.toString() : '');
+    _yearsController = TextEditingController(
+      text: c.yearsOfExperience > 0 ? c.yearsOfExperience.toString() : '',
+    );
     _summaryController = TextEditingController(text: c.summary);
     _linkedInController = TextEditingController(text: c.linkedInUrl);
     _portfolioController = TextEditingController(text: c.portfolioUrl);
@@ -127,7 +150,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _validatePhone() {
     final phone = _phoneController.text.trim();
     if (!_phoneRegex.hasMatch(phone)) {
-      setState(() => _phoneError = 'Enter a valid phone number (e.g. 061234567)');
+      setState(
+        () => _phoneError = 'Enter a valid phone number (e.g. 061234567)',
+      );
       return false;
     }
     setState(() => _phoneError = null);
@@ -140,7 +165,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     setState(() => _uploadingPicture = true);
     try {
-      final updated = await _jobService.uploadProfilePicture(widget.candidate.id, result.files.single.path!);
+      final updated = await _jobService.uploadProfilePicture(
+        widget.candidate.id,
+        result.files.single.path!,
+      );
       setState(() {
         _newProfilePictureUrl = updated.profilePictureUrl;
         _uploadingPicture = false;
@@ -148,9 +176,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     } catch (e) {
       setState(() => _uploadingPicture = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to upload picture: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to upload picture: $e')));
       }
     }
   }
@@ -164,7 +192,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     setState(() => _uploadingCv = true);
     try {
-      final updated = await _jobService.uploadCv(widget.candidate.id, result.files.single.path!);
+      final updated = await _jobService.uploadCv(
+        widget.candidate.id,
+        result.files.single.path!,
+      );
       setState(() {
         _newCvUrl = updated.cvUrl;
         _uploadingCv = false;
@@ -177,9 +208,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     } catch (e) {
       setState(() => _uploadingCv = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to upload CV: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to upload CV: $e')));
       }
     }
   }
@@ -221,15 +252,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     } catch (e) {
       setState(() {
         _saving = false;
-        _error = 'Failed to save changes. Please try again.';
+        _error = e.toString();
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final pictureUrl = _newProfilePictureUrl ?? widget.candidate.profilePictureUrl;
-    final fullPictureUrl = pictureUrl.isNotEmpty ? '${ApiConfig.baseUrl}$pictureUrl' : null;
+    final pictureUrl =
+        _newProfilePictureUrl ?? widget.candidate.profilePictureUrl;
+    final fullPictureUrl = pictureUrl.isNotEmpty
+        ? '${ApiConfig.baseUrl}$pictureUrl'
+        : null;
 
     return Scaffold(
       appBar: AppBar(
@@ -258,11 +292,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     child: ClipOval(
                       child: fullPictureUrl != null
                           ? Image.network(
-                        fullPictureUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Icon(Icons.person, size: 40, color: AppColors.tealMain),
-                      )
-                          : const Icon(Icons.person, size: 40, color: AppColors.tealMain),
+                              fullPictureUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => const Icon(
+                                Icons.person,
+                                size: 40,
+                                color: AppColors.tealMain,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.person,
+                              size: 40,
+                              color: AppColors.tealMain,
+                            ),
                     ),
                   ),
                   Positioned(
@@ -280,10 +322,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         ),
                         child: _uploadingPicture
                             ? const Padding(
-                          padding: EdgeInsets.all(6),
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                        )
-                            : const Icon(Icons.camera_alt, size: 14, color: Colors.white),
+                                padding: EdgeInsets.all(6),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(
+                                Icons.camera_alt,
+                                size: 14,
+                                color: Colors.white,
+                              ),
                       ),
                     ),
                   ),
@@ -316,7 +365,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               onChanged: (_) {
                 if (_phoneError != null) _validatePhone();
               },
-              decoration: InputDecoration(labelText: 'Phone', errorText: _phoneError),
+              decoration: InputDecoration(
+                labelText: 'Phone',
+                errorText: _phoneError,
+              ),
             ),
             const SizedBox(height: 14),
             TextField(
@@ -339,7 +391,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 isExpanded: true,
                 decoration: const InputDecoration(labelText: 'Country'),
                 items: _countries
-                    .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name)))
+                    .map(
+                      (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
+                    )
                     .toList(),
                 onChanged: _onCountryChanged,
               ),
@@ -349,7 +403,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 isExpanded: true,
                 decoration: const InputDecoration(labelText: 'City'),
                 items: _cities
-                    .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name)))
+                    .map(
+                      (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
+                    )
                     .toList(),
                 onChanged: (value) => setState(() => _selectedCityId = value),
               ),
@@ -357,21 +413,31 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               DropdownButtonFormField<int>(
                 initialValue: _selectedIndustryId,
                 isExpanded: true,
-                decoration: const InputDecoration(labelText: 'Preferred industry'),
+                decoration: const InputDecoration(
+                  labelText: 'Preferred industry',
+                ),
                 items: _industries
-                    .map((i) => DropdownMenuItem(value: i.id, child: Text(i.name)))
+                    .map(
+                      (i) => DropdownMenuItem(value: i.id, child: Text(i.name)),
+                    )
                     .toList(),
-                onChanged: (value) => setState(() => _selectedIndustryId = value),
+                onChanged: (value) =>
+                    setState(() => _selectedIndustryId = value),
               ),
               const SizedBox(height: 14),
               DropdownButtonFormField<int>(
                 initialValue: _selectedEmploymentTypeId,
                 isExpanded: true,
-                decoration: const InputDecoration(labelText: 'Preferred work type'),
+                decoration: const InputDecoration(
+                  labelText: 'Preferred work type',
+                ),
                 items: _employmentTypes
-                    .map((t) => DropdownMenuItem(value: t.id, child: Text(t.name)))
+                    .map(
+                      (t) => DropdownMenuItem(value: t.id, child: Text(t.name)),
+                    )
                     .toList(),
-                onChanged: (value) => setState(() => _selectedEmploymentTypeId = value),
+                onChanged: (value) =>
+                    setState(() => _selectedEmploymentTypeId = value),
               ),
             ],
             const SizedBox(height: 14),
@@ -379,7 +445,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             TextField(
               controller: _yearsController,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Years of experience'),
+              decoration: const InputDecoration(
+                labelText: 'Years of experience',
+              ),
             ),
             const SizedBox(height: 14),
             TextField(
@@ -405,7 +473,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             const SizedBox(height: 20),
             const Text(
               'Skills',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: AppColors.textPrimary,
+              ),
             ),
             const SizedBox(height: 10),
             Wrap(
@@ -424,16 +496,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     });
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: isSelected ? AppColors.tealDark : Colors.white,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: isSelected ? AppColors.tealDark : AppColors.border),
+                      border: Border.all(
+                        color: isSelected
+                            ? AppColors.tealDark
+                            : AppColors.border,
+                      ),
                     ),
                     child: Text(
                       skill,
                       style: TextStyle(
-                        color: isSelected ? Colors.white : AppColors.textPrimary,
+                        color: isSelected
+                            ? Colors.white
+                            : AppColors.textPrimary,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -446,16 +527,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             const SizedBox(height: 20),
             const Text(
               'CV / Resume',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: AppColors.textPrimary,
+              ),
             ),
             const SizedBox(height: 10),
             OutlinedButton.icon(
               onPressed: _uploadingCv ? null : _pickCv,
               icon: _uploadingCv
-                  ? const SizedBox(height: 14, width: 14, child: CircularProgressIndicator(strokeWidth: 2))
+                  ? const SizedBox(
+                      height: 14,
+                      width: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
                   : const Icon(Icons.upload_file, size: 18),
               label: Text(
-                (_newCvUrl ?? widget.candidate.cvUrl).isNotEmpty ? 'Replace CV' : 'Upload CV (PDF, DOC)',
+                (_newCvUrl ?? widget.candidate.cvUrl).isNotEmpty
+                    ? 'Replace CV'
+                    : 'Upload CV (PDF, DOC)',
               ),
             ),
 
@@ -470,7 +561,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
                 child: Text(
                   _error!,
-                  style: const TextStyle(color: Color(0xFFC0392B), fontSize: 13),
+                  style: const TextStyle(
+                    color: Color(0xFFC0392B),
+                    fontSize: 13,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -483,9 +577,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 onPressed: _saving ? null : _save,
                 child: _saving
                     ? const SizedBox(
-                  height: 18, width: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                )
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
                     : const Text('Save changes'),
               ),
             ),

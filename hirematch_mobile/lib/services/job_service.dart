@@ -284,7 +284,7 @@ class JobService {
 
   Future<void> applyToJob({required int jobPostId, String? cvFilePath}) async {
     final token = await _authService.getToken();
-    final uri = Uri.parse('${ApiConfig.baseUrl}/Applications');
+    final uri = Uri.parse('${ApiConfig.baseUrl}/Applications/upload');
     final request = http.MultipartRequest('POST', uri);
 
     if (token != null) {

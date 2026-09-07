@@ -56,8 +56,12 @@ class _JobPostFormDialogState extends State<JobPostFormDialog> {
     super.initState();
     final job = widget.jobPost;
     _titleController = TextEditingController(text: job?.title ?? '');
-    _descriptionController = TextEditingController(text: job?.description ?? '');
-    _compensationController = TextEditingController(text: job?.compensation ?? '');
+    _descriptionController = TextEditingController(
+      text: job?.description ?? '',
+    );
+    _compensationController = TextEditingController(
+      text: job?.compensation ?? '',
+    );
     _selectedCompanyId = job?.companyId;
     _selectedEmploymentTypeId = job?.employmentTypeId;
     _selectedIndustryId = job?.industryId;
@@ -105,7 +109,8 @@ class _JobPostFormDialogState extends State<JobPostFormDialog> {
   Future<void> _pickExpiryDate() async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: _selectedExpiryDate ?? DateTime.now().add(const Duration(days: 30)),
+      initialDate:
+          _selectedExpiryDate ?? DateTime.now().add(const Duration(days: 30)),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
     );
@@ -117,7 +122,6 @@ class _JobPostFormDialogState extends State<JobPostFormDialog> {
   bool get _isFormValid =>
       _selectedCompanyId != null &&
       _selectedEmploymentTypeId != null &&
-      (_isEditing || _selectedIndustryId != null) &&
       _selectedExpiryDate != null;
 
   Future<void> _save() async {
@@ -143,6 +147,7 @@ class _JobPostFormDialogState extends State<JobPostFormDialog> {
           companyId: _selectedCompanyId!,
           recruiterId: widget.currentUserId,
           employmentTypeId: _selectedEmploymentTypeId!,
+          industryId: widget.jobPost!.industryId ?? 0,
           cityId: _selectedCityId,
           workModeId: _selectedWorkModeId,
           compensation: compensation,
@@ -169,7 +174,8 @@ class _JobPostFormDialogState extends State<JobPostFormDialog> {
       setState(() => _serverError = e.message);
     } catch (_) {
       setState(
-        () => _serverError = 'Unable to save data. Please check your connection.',
+        () =>
+            _serverError = 'Unable to save data. Please check your connection.',
       );
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -191,7 +197,7 @@ class _JobPostFormDialogState extends State<JobPostFormDialog> {
                   padding: const EdgeInsets.all(24),
                   child: Form(
                     key: _formKey,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    autovalidateMode: AutovalidateMode.disabled,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -242,7 +248,10 @@ class _JobPostFormDialogState extends State<JobPostFormDialog> {
                           const SizedBox(height: 6),
                           Text(
                             'Company is required.',
-                            style: TextStyle(color: Colors.red.shade700, fontSize: 12),
+                            style: TextStyle(
+                              color: Colors.red.shade700,
+                              fontSize: 12,
+                            ),
                           ),
                         ],
                         const SizedBox(height: 16),
@@ -304,7 +313,10 @@ class _JobPostFormDialogState extends State<JobPostFormDialog> {
                           const SizedBox(height: 6),
                           Text(
                             'Employment type and industry are required.',
-                            style: TextStyle(color: Colors.red.shade700, fontSize: 12),
+                            style: TextStyle(
+                              color: Colors.red.shade700,
+                              fontSize: 12,
+                            ),
                           ),
                         ],
                         const SizedBox(height: 16),
@@ -368,7 +380,14 @@ class _JobPostFormDialogState extends State<JobPostFormDialog> {
                             border: OutlineInputBorder(),
                             hintText: 'e.g. 1500-2000 BAM',
                           ),
-                          validator: (v) => _validateRequired(v, 'Compensation'),
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty)
+                              return 'Compensation is required.';
+                            final hasNumber = RegExp(r'\d').hasMatch(v);
+                            if (!hasNumber)
+                              return 'Compensation must contain a number, e.g. 1500-2000 KM';
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 16),
                         InkWell(
@@ -381,7 +400,9 @@ class _JobPostFormDialogState extends State<JobPostFormDialog> {
                             ),
                             child: Text(
                               _selectedExpiryDate != null
-                                  ? DateFormat('dd.MM.yyyy').format(_selectedExpiryDate!)
+                                  ? DateFormat(
+                                      'dd.MM.yyyy',
+                                    ).format(_selectedExpiryDate!)
                                   : 'Select a date',
                             ),
                           ),
@@ -390,7 +411,10 @@ class _JobPostFormDialogState extends State<JobPostFormDialog> {
                           const SizedBox(height: 6),
                           Text(
                             'Application deadline is required.',
-                            style: TextStyle(color: Colors.red.shade700, fontSize: 12),
+                            style: TextStyle(
+                              color: Colors.red.shade700,
+                              fontSize: 12,
+                            ),
                           ),
                         ],
                         const SizedBox(height: 16),
@@ -398,9 +422,8 @@ class _JobPostFormDialogState extends State<JobPostFormDialog> {
                           alignment: Alignment.centerLeft,
                           child: Text(
                             'Required Skills (optional)',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.w600),
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -427,7 +450,9 @@ class _JobPostFormDialogState extends State<JobPostFormDialog> {
                           spacing: 8,
                           runSpacing: 8,
                           children: _skills.map((skill) {
-                            final selected = _selectedSkillIds.contains(skill.id);
+                            final selected = _selectedSkillIds.contains(
+                              skill.id,
+                            );
                             return FilterChip(
                               label: Text(skill.name),
                               selected: selected,
@@ -447,7 +472,10 @@ class _JobPostFormDialogState extends State<JobPostFormDialog> {
                           const SizedBox(height: 16),
                           Text(
                             _serverError!,
-                            style: TextStyle(color: Colors.red.shade700, fontSize: 13),
+                            style: TextStyle(
+                              color: Colors.red.shade700,
+                              fontSize: 13,
+                            ),
                           ),
                         ],
                         const SizedBox(height: 24),
@@ -467,7 +495,9 @@ class _JobPostFormDialogState extends State<JobPostFormDialog> {
                                   ? const SizedBox(
                                       height: 18,
                                       width: 18,
-                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
                                     )
                                   : Text(_isEditing ? 'Save' : 'Add'),
                             ),
