@@ -190,7 +190,7 @@ namespace HireMatch.Services.Implementations
             if (file.Length > 5 * 1024 * 1024)
                 throw new BusinessException("CV size must be under 5MB.");
 
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "cvs");
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "private_uploads", "cvs");
             Directory.CreateDirectory(uploadsFolder);
             var fileName = $"{Guid.NewGuid()}{ext}";
             var filePath = Path.Combine(uploadsFolder, fileName);

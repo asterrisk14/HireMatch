@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:printing/printing.dart';
@@ -117,11 +118,24 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
 
   Future<void> _openCv(Application application) async {
     if (application.cvUrl.isEmpty) return;
-    final ok = await launchUrl(
-      Uri.parse('${ApiConfig.baseUrl}${application.cvUrl}'),
-    );
-    if (!ok && mounted) {
-      showAppSnackBar(context, 'Unable to open this CV file.', isError: true);
+    try {
+      final bytes = await ApplicationsService.downloadCv(application.id);
+      final extension = application.cvUrl.split('.').last;
+      final file = File(
+        '${Directory.systemTemp.path}${Platform.pathSeparator}'
+        'hirematch-application-${application.id}.$extension',
+      );
+      await file.writeAsBytes(bytes, flush: true);
+      final ok = await launchUrl(file.uri);
+      if (!ok && mounted) {
+        showAppSnackBar(context, 'Unable to open this CV file.', isError: true);
+      }
+    } on ApiException catch (e) {
+      if (mounted) showAppSnackBar(context, e.message, isError: true);
+    } catch (_) {
+      if (mounted) {
+        showAppSnackBar(context, 'Unable to download this CV file.', isError: true);
+      }
     }
   }
 

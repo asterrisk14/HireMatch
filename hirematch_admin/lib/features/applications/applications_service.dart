@@ -90,17 +90,18 @@ class ApplicationsService {
     return result.result;
   }
 
-  static Future<Application> updateStatus(
+  static Future<void> updateStatus(
     int id,
     int applicationStatusId,
   ) async {
-    final json =
-        await ApiClient.instance.put(
-              '${ApiEndpoints.applications}/$id',
-              body: {'applicationStatusId': applicationStatusId},
-            )
-            as Map<String, dynamic>;
-    return Application.fromJson(json);
+    await ApiClient.instance.put(
+      '${ApiEndpoints.applications}/$id',
+      body: {'applicationStatusId': applicationStatusId},
+    );
+  }
+
+  static Future<List<int>> downloadCv(int id) async {
+    return ApiClient.instance.getBytes('${ApiEndpoints.applications}/$id/cv');
   }
 
   static Future<void> delete(int id) async {

@@ -51,6 +51,15 @@ class ApiClient {
     return _handle(res);
   }
 
+  Future<List<int>> getBytes(String path) async {
+    final res = await http.get(_uri(path), headers: await _headers());
+    if (res.statusCode >= 200 && res.statusCode < 300) {
+      return res.bodyBytes;
+    }
+    _handle(res);
+    throw StateError('The request did not return a response.');
+  }
+
   Future<dynamic> post(
     String path, {
     Object? body,
